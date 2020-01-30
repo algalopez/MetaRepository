@@ -1,22 +1,18 @@
 # aglPython
 
-Description: Some one file python modules
+Some simple algorithms in python
 
+---
 
-------------------------------------------------------------------
+Structure:
+
+- GeneticAlgoritm:        Simple genetic algorithm
+- RebeccaEncryption:    Encryption and decryption book algorithm
+
+----
+
 Todo list:
-------------------------------------------------------------------
 
-simpleGA.py:        Simple genetic algorithm
-
-bbsTree.py:         Balanced binary search tree
-
-sorting.py:         Quicksort, Bubblesort, MergeSort, etc?
-
-simpleNN.py:        Simple neural network
-                    Supervised and with backpropagation
-
-
-
-
-
+- bbsTree.py:         Balanced binary search tree
+- sorting.py:         Quicksort, Bubblesort, MergeSort, etc?
+- simpleNN.py:        Simple neural network, supervised and with backpropagation
