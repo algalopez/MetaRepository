@@ -13,3 +13,19 @@ Encryption algortith used in Ken Foller's book: The key to Rebecca
 **Usage:**
 - Set the birthday month, message and book text
 - Execute: python RebeccaClient.py
+
+**Useful Docker commands:**
+
+Build image:
+>docker build -f script/Dockerfile -t rebecca-encryption .
+
+Run container:
+>docker run --name rebecca rebecca-encryption
+
+Remove container:
+>docker rm rebecca
+
+Others:
+>docker image ls
+
+>docker ps -a
