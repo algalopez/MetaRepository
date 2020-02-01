@@ -2,7 +2,7 @@ import unittest
 import logging
 import string
 import RebeccaEncryption
-import EncryptionError
+import RebeccaError
 
 
 class TestStringMethods(unittest.TestCase):
@@ -19,7 +19,7 @@ class TestStringMethods(unittest.TestCase):
         self.assertEqual([0, 0], RebeccaEncryption.process_to_index_list("ABCDE", "AB"))
         self.assertEqual([0, 0, 2], RebeccaEncryption.process_to_index_list("ABCDE", "ABE"))
 
-        with self.assertRaises(EncryptionError.EncryptionError):
+        with self.assertRaises(RebeccaError.EncryptionError):
             RebeccaEncryption.process_to_index_list("ABCDE", "AA")
 
     def test_map_to_alphabet(self):

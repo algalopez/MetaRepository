@@ -1,12 +1,13 @@
 import logging
 import string
-from . import RebeccaEncryption
-from . import EncryptionError
+import RebeccaEncryption
+import RebeccaDecryption
+import RebeccaError
 
 
 alphabet = string.ascii_uppercase
 birthday_month = 5
-plain_message = 'Congrats'
+plain_message = 'test'
 book_text = '''
 Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. 
 Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. 
@@ -30,8 +31,11 @@ if __name__ == '__main__':
 
         tunedMessage = ''.join(filter(lambda x: x in alphabet, plain_message.upper()))
         encoded_text = RebeccaEncryption.encode(tunedMessage, book_text, alphabet, birthday_month)
-        print('  PLAIN TEXT: {}'.format(plain_message))
-        print('ENCODED TEXT: {}'.format(encoded_text))
+        decoded_tex = RebeccaDecryption.decode(encoded_text, book_text, alphabet, birthday_month)
 
-    except EncryptionError as e:
+        print('   PLAIN TEXT: {}'.format(plain_message))
+        print(' ENCODED TEXT: {}'.format(encoded_text))
+        print('DECODED TEXTS: {}'.format(decoded_tex))
+
+    except RebeccaError.EncryptionError as e:
         logging.error(e)
