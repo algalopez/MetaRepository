@@ -3,6 +3,40 @@ import functools
 import RebeccaEncryption
 
 
+class Node:
+
+    def __init__(self, message, book, partial, alphabet=None):
+        self.message = message
+        self.book = book
+        self.partial = partial
+        if alphabet is not None:
+            self.nexts = self.get_all_valid_positions(alphabet)
+
+    def __str__(self) -> str:
+        return "(m: {}, p: {}, n: {})".format(self.message, self.partial, self.nexts)
+
+    def get_all_valid_positions(self, alphabet, acc=None, iteration=0):
+        if acc is None:
+            acc = list()
+
+        # Finnish
+        if not self.message:
+            return acc
+
+        letter_index = alphabet.find(self.message[0])
+
+        # Finnish
+        if len(self.book) <= letter_index + (len(alphabet) * iteration):
+            return acc
+
+        # Accept
+        if self.book[letter_index + (len(alphabet) * iteration)] not in self.book[:letter_index + (len(alphabet) * iteration)]:
+            acc.append(letter_index + (len(alphabet) * iteration))
+
+        # Iterate
+        return self.get_all_valid_positions(alphabet, acc, iteration + 1)
+
+
 def decode(message, book, alphabet, nth):
     """Decode a message using the "Rebecca" algorithm
 
@@ -24,47 +58,33 @@ def decode(message, book, alphabet, nth):
     encoding_function = RebeccaEncryption.compose(*secuence_of_functions)
     prepared_book = encoding_function(book)
 
-    decoded_text = decode_backtrack(message, prepared_book, alphabet, list(), '', list())
+    next_node = Node(message, prepared_book, "", alphabet)
+    logging.debug("nn: %s", str(next_node))
+    decoded_text = decode_backtrack(next_node, list(), list(), alphabet)
     logging.info("Decoded texts: %s", decoded_text)
     return decoded_text
 
 
-def decode_backtrack(message, book, alphabet, result, partial, nexts):
-    logging.debug("BT - message: %s, result: %s, partial: %s, nexts: %s", message, result, partial, nexts)
+def decode_backtrack(node: Node, results, queue, alphabet):
+    logging.debug("BT - node: %s, results: %s, next_nodes_len: %d", str(node), results, len(queue))
 
-    # Reject
-    if not book:
-        return
+    if not node:
+        if not queue:
+            return results
+        else:
+            return decode_backtrack(queue[0], results, queue[1:], alphabet)
 
-    # Accept
-    if not message:
-        result.append(partial)
-        return
+    if not node.message:
+        results.append(node.partial)
+        return decode_backtrack(None, results, queue, alphabet)
 
-    # Iterate
-    if not nexts:
-        valid_positions = get_all_valid_positions(message[0], book, alphabet, list(), 0)
-        return decode_backtrack(message, book, alphabet, result, partial, valid_positions)
+    if node.nexts:
+        next_node = Node(node.message[1:],
+                         node.book[node.nexts[0] + 1:],
+                         node.partial + node.book[node.nexts[0]],
+                         alphabet)
+        queue.append(next_node)
+        node.nexts = node.nexts[1:]
+        return decode_backtrack(node, results, queue, alphabet)
 
-    if len(book) > nexts[0] + 1 and len(message) >= 1:
-        decode_backtrack(message[1:], book[nexts[0] + 1:], alphabet, result, partial + book[nexts[0]], list())
-
-    if len(nexts) > 1:
-        return decode_backtrack(message, book, alphabet, result, partial, nexts[1:])
-
-    return result
-
-
-def get_all_valid_positions(letter, book, alphabet, acc, iteration=0):
-    letter_index = alphabet.find(letter)
-
-    # Reject
-    if len(book) <= letter_index + (len(alphabet) * iteration):
-        return acc
-
-    # Accept
-    if book[letter_index + (len(alphabet) * iteration)] not in book[:letter_index + (len(alphabet) * iteration)]:
-        acc.append(letter_index + (len(alphabet) * iteration))
-
-    # Iterate
-    return get_all_valid_positions(letter, book, alphabet, acc, iteration + 1)
+    return decode_backtrack(None, results, queue, alphabet)
