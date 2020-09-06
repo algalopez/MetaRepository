@@ -1,18 +1,12 @@
-# aglPython
+# Meta Repository
 
-Some simple algorithms in python
-
----
-
-Structure:
-
-- GeneticAlgoritm:        Simple genetic algorithm
-- RebeccaEncryption:    Encryption and decryption book algorithm
+Collection of small projects
 
 ----
 
-Todo list:
+**Projects:**
 
-- bbsTree.py:         Balanced binary search tree
-- sorting.py:         Quicksort, Bubblesort, MergeSort, etc?
-- simpleNN.py:        Simple neural network, supervised and with backpropagation
+| Project           | Language | Description                              |
+|-------------------|:--------:|:-----------------------------------------|
+| GeneticAlgoritm   |  Python  | Simple genetic algorithm                 |
+| RebeccaEncryption |  Python  | Encryption and decryption book algorithm |
