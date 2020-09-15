@@ -1,0 +1,11 @@
+version: "3.7"
+services:
+  funspel:
+    build:
+      context: .
+      dockerfile: Dockerfile_dev
+    volumes:
+      - ../:/funspel
+    tty: true
+    network_mode: host
+    

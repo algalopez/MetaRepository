@@ -1,0 +1,14 @@
+FROM ubuntu:focal
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update \
+    && apt-get install -y bash-completion man nano
+
+RUN echo "alias ls='ls --color'" >> /root/.bashrc \
+    && echo "source /etc/bash_completion" >> /root/.bashrc
+
+WORKDIR /funspel
+
+ENV DEBIAN_FRONTEND=
+

@@ -1,0 +1,16 @@
+{
+    "name": "FunSpel",
+    "dockerComposeFile": [
+      "docker-compose.yml"
+    ],
+    "service": "funspel",
+    "workspaceFolder": "/funspel",
+    "extensions": [],
+    "shutdownAction": "stopCompose",
+    "settings": {
+      "files.associations": {
+        "Dockerfile*": "dockerfile"
+      },
+      "terminal.integrated.fontSize": 16,
+    }
+  }
