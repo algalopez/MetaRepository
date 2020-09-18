@@ -3,33 +3,164 @@
 </head>
 <body>
 <div class="container">
-    <h2>Inmutability</h2>
 
-    <h2>Functions</h2>
-
-
-
-
-
-    <div>
-        01 Intro: Inmutability (pure + memoization + Side effects) + Functions + Referential transparency+ Languages<br>
-    </div>
-    <div>
-        02 Concepts: Currying, Resursivity, TRO, Composition, Monads -- Haskell<br>
-    </div>
-    <div>
-        03 Higher order functions: Map, Reduce, etc -- Python<br>
-    </div>
-    <div>
-        04 Recursivity: Recursion + Tail recursion and TRO + Backtracking
-    </div>
-    <div>
-        05 Lensing: With + Lense -- Java<br>
-    </div>
-    <div>
-        06 Bibliography<br>
+    <h2>INTRODUCTION</h2>
+    
+    <div class="subindex">
+    <p>
+        Programming paradigm where programs are constructed by applying and composing pure functions.
+    </p>
+        <ul>
+            <li><a href="#Functions">Functions</a><br></li>
+            <li><a href="#Inmutability">Inmutability</a></li>
+            <li><a href="#EvaluationTypes">Evaluation types</a></li>
+            <li><a href="#LanguageClassification">Language classification</a></li>
+            <li><a href="#Disadvantages">Disadvantages</a></li>
+        </ul>    
     </div>
 
+    <div id="Functions">
+        <h3>FUNCTIONS</h3>
+        <p>
+            Functions are treated as first-class citizens, meaning that they can be bound to names (including local identifiers), passed as arguments, and returned from other functions, just as any other data type can
+        </p>
+        <p>
+            <b>First class functions:</b><br>
+            This means the language supports passing functions as arguments to other functions, returning them as the values from other functions, and assigning them to variables or storing them in data structures
 
+        </p>
+        <p>
+            <b>Higher order functions:</b><br>
+            These are funtions that at least meet one of the following contitions.
+            <ul>
+                <li>Takes one or more functions as arguments </li>
+                <li>returns a function as its result.</li>
+            </ul>
+            ej: map, sort, fold, apply, etc
+        </p>
+    </div>
+
+    <div id="Inmutability">
+        <h3>INMUTABILITY</h3>
+        <p>
+            <b>Pure function:</b><br>
+            When a pure function is called with some given arguments, it will always return the same result, and cannot be affected by any mutable state or other side effects
+        </p>
+        <p>
+            <b>Inmutable data structures:</b><br>
+            A persistent data structure will not (visibly) update the structure in-place, but instead always yield a new updated structure<br>
+            <i>Can a stack POP method conserve inmutability an keep its efficiency O(1)?</i>
+        </p>
+        <p>
+            <b>Memoization and referencial transparency:</b><br>
+            Memoization is an otimization technique used to store the results of expensive function calls<br>
+            Referential transparency is the possibility to replace a function by it's returning value<br><br>
+            When a function is pure and its parameters are inmutable, the memoization and referential transparency are possible<br>
+
+        </p>
+        <div class="example">
+            <p> 
+                Example: Pure and impure functions
+            </p>
+            Impure:
+            <code>
+                <pre>
+                    var x = 5;
+                    function doBafThings(a) {
+                        var y = a + x;                              // Use of an external variable   
+                        var z = new Date().getTime().plusDays(y);   // Use of a random/non consistent value
+                        updateDatabase();                           // Side Effect     
+                        return z;        
+                    }
+                </pre>
+            </code>
+            Pure function with inmutable parameters:
+            <code>
+                <pre>
+                    function sum(a, b) {
+                        return a+b;        
+                    }
+                </pre>
+            </code>
+        </div>
+    </div>
+    <div id="EvaluationTypes">
+        <h3>EVALUATION TYPES</h3>
+        <p>
+            Languages are usually categorized by whether they use strict (eager) or non-strict (lazy) evaluation.<br>
+            Functional languages are usually lazy evaluated
+        </p>
+        <ul>
+            <li><b>Strict: </b>Arguments to a function are always evaluated completely before the function is applied
+                <ul>
+                    <li>by value, by reference, partial evaluation</li>
+                </ul>
+            </li>
+            <li><b>Non-Strict: </b>Arguments to a function are not evaluated unless they are actually used in the evaluation of the function body
+                <ul>
+                    <li>By name, by need etc</li>
+                </ul>
+            </li>
+            <li><b>Non deterministic: </b>Who knows
+                <ul>
+                    <li>Call by future, Beta reduction, etc.</li>
+                </ul>
+            </li>
+        </ul>
+        <div class="example">
+            <p> 
+                Example: Range() function in python changed from eager to lazy evaluation in version 3
+            </p>
+            Python 2:
+            <code>
+                <pre>
+                    >>> r = range(10)
+                    >>> print r
+                    [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+                    >>> print r[3]
+                    3
+                </pre>
+            </code>
+            Python 3:
+            <code>
+                <pre>
+                    >>> r = range(10)
+                    >>> print(r)
+                    range(0, 10)
+                    >>> print(r[3])
+                    3
+                </pre>
+            </code>
+        </div>
+    </div>
+    <div id="LanguageClassification">
+        <h3>LANGUAGE CLASSIFICATION</h3>
+        <ul>
+            <li><b>Pure: </b>haskell, Elm</li>
+            <li><b>Impure: </b>Python, F#, Scala, C++, Clojure, Rust, Julia, ...</li>
+            <li><b>Not a programming language and also impure :'( : </b>PHP</li>
+        </ul>
+    </div>
+    <div id="Disadvantages">
+        <h3>DISADVANTAGES</h3>
+        <ul>
+            <li>Inmutability combined with recursion might lead to poorer performance</li>
+            <li>Recursion or too dense code might lead to worse readability</li>
+            <li>Sandwich principle or how to organize the impure code</li>
+        </ul>
+    </div>
+    <div>
+        <h3>OTHER</h3>
+        <p>
+            Some terms seen but not checked yet:
+            <ul>
+                <li>Alpha Conversion</li>
+                <li>Beta and Eta Reductions</li>
+                <li>asdasd</li>
+                <li>qweqwe</li>
+            </ul>
+        </p>
+        <i>Also: you might be able to mathematically prove the correctness of a program</i>
+    </div>
 </div>
 </body>
