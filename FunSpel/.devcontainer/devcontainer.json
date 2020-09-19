@@ -8,7 +8,9 @@
     "workspaceFolder": "/funspel",
     "mounts": ["source=${localWorkspaceFolder}/,target=/funspel/,type=bind,consistency=cached"],
     "extensions": [
-      "ms-python.python"
+      "ms-python.python",
+      "haskell.haskell",
+      "justusadam.language-haskell"
     ],
     "settings": {
       "workbench.tree.indent": 20,

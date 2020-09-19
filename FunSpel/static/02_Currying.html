@@ -5,8 +5,87 @@
 <body>
 <div class="container">
 
-    <h2>Currying</h2>
+    <h2>CURRYING</h2>
 
+    <div class="subindex">
+        <p>
+            Technique of converting a function that takes multiple arguments into a sequence of functions that each take a single argument.
+        </p>
+        <ul>
+            <li><a href="#manualApplication">Manual application</a><br></li>
+            <li><a href="#automaticPartialApplication">Automatic Partial application</a><br></li>
+        </ul>   
+    </div>
 
+    <div id="manualApplication">
+        <h3>MANUAL</h3>
+        <div class="example">
+            <p> 
+                Example: Curryfied function
+            </p>
+            Not Curryfied:
+            <code>
+                <pre>
+                    function sumAndMultiply(a, b, c) {
+                        return (a+b)*c;
+                    }
+                </pre>
+            </code>
+            Curryfied:
+            <code>
+                <pre>
+                    function curriedSumAndMultiply(a) {
+                        return function(b) {
+                            return function(c) {
+                                return (a+b)*c
+                            }
+                        };
+                    }
+                </pre>
+            </code>
+            Results:
+            <code>
+                <pre>
+                    &gt;&gt; sumAndMultiply(2,3,5)
+                    &lt;- 25
+                    &gt;&gt; curriedSumAndMultiply(2)(3)(5))
+                    &lt;- 25
+                </pre>
+            </code>
+        </div>
+    </div>
+
+    <div id="automaticPartialApplication">
+        <h3>AUTOMATIC PARTIAL APPLICATION</h3>
+        Automatic partial application automatically curry the funcions
+        <div class="example">
+            <p> 
+                Example: Curryfied function
+            </p>
+            Haskell sample:
+            <code>
+                <pre>
+                    add :: Int -> Int -> Int
+                    add x y = x + y
+                    
+                    multiply :: Int -> Int -> Int
+                    multiply x y = x * y
+                    
+                    sumAndMultiply:: Int -> Int -> Int -> Int
+                    sumAndMultiply a b c = multiply (add a b) c
+                </pre>
+            </code>
+            Demo:
+            <code>
+                <pre>
+                    *Main> let multiplyBy11 = sumAndMultiply 7 4
+                    *Main> :info multiplyBy11 
+                    multiplyBy11 :: Int -> Int
+                    *Main> multiplyBy11 3
+                    33
+                </pre>
+            </code>
+        </div>
+    </div>
 </div>
 </body>
