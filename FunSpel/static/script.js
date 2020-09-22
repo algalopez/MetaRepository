@@ -12,10 +12,11 @@ function start() {
     document.getElementById("intro").addEventListener("click", function(){load_page('01_Intro.html')});
     document.getElementById("currying").addEventListener("click", function(){load_page('02_Currying.html')});
     document.getElementById("recursion").addEventListener("click", function(){load_page('03_Recursion.html')});
-    document.getElementById("monads").addEventListener("click", function(){load_page('04_Monads.html')});
-    document.getElementById("hof").addEventListener("click", function(){load_page('05_HOF.html')});
-    document.getElementById("lenses").addEventListener("click", function(){load_page('06_Lenses.html')});
-    document.getElementById("bibliography").addEventListener("click", function(){load_page('07_Bibliography.html')});
+    document.getElementById("composition").addEventListener("click", function(){load_page('04_Composition.html')});
+    document.getElementById("monads").addEventListener("click", function(){load_page('05_Monads.html')});
+    document.getElementById("hof").addEventListener("click", function(){load_page('06_HOF.html')});
+    document.getElementById("lenses").addEventListener("click", function(){load_page('07_Lenses.html')});
+    document.getElementById("bibliography").addEventListener("click", function(){load_page('08_Bibliography.html')});
  }
 
 function load_page(page) {

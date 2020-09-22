@@ -1,0 +1,38 @@
+<head>
+    <link rel="stylesheet" type="text/css" href="style_container.css">
+</head>
+
+<body>
+<div class="container">
+
+    <h2>COMPOSITION</h2>
+    <div class="subindex">
+        <p>
+            Process of using the output of a function as the input of the nex one
+        </p>
+        <ul>
+            <li><a href="#composition">Composition</a><br></li>
+        </ul>   
+    </div>
+    <div id="composition">
+        <h3>COMPOSITION</h3>
+        Function signature:
+        <pre>
+            (.)                     :: (b->c) -> (a->b) -> (a->c) <br>
+            f . g                   = \ x -> f (g x)
+        </pre>
+        <div class="example">
+            <p> 
+                Example: Composition of f(f(g(x))) where 
+                <ul><li>f(x) = x+1</li><li>g(x) = x*10</li></ul>
+            </p>
+            <code>
+                <pre>
+                    composeFunctions:: Integer -> Integer
+                    composeFunctions = \x -> ((+1).(+1).(*10)) x
+                </pre>
+            </code>
+        </div>
+    </div>
+</div>
+</body>
