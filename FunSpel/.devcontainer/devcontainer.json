@@ -10,7 +10,8 @@
     "extensions": [
       "ms-python.python",
       "haskell.haskell",
-      "justusadam.language-haskell"
+      "justusadam.language-haskell",
+      "ms-vsliveshare.vsliveshare"
     ],
     "settings": {
       "workbench.tree.indent": 20,
