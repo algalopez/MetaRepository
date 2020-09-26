@@ -12,7 +12,7 @@
         </p>
         <ul>
             <li><a href="#Functions">Functions</a><br></li>
-            <li><a href="#Inmutability">Inmutability</a></li>
+            <li><a href="#Immutability">Immutability</a></li>
             <li><a href="#EvaluationTypes">Evaluation types</a></li>
             <li><a href="#LanguageClassification">Language classification</a></li>
             <li><a href="#Disadvantages">Disadvantages</a></li>
@@ -40,22 +40,22 @@
         </p>
     </div>
 
-    <div id="Inmutability">
-        <h3>INMUTABILITY</h3>
+    <div id="Immutability">
+        <h3>ImMUTABILITY</h3>
         <p>
             <b>Pure function:</b><br>
             When a pure function is called with some given arguments, it will always return the same result, and cannot be affected by any mutable state or other side effects
         </p>
         <p>
-            <b>Inmutable data structures:</b><br>
+            <b>Immutable data structures:</b><br>
             A persistent data structure will not (visibly) update the structure in-place, but instead always yield a new updated structure<br>
-            <i>Can a stack POP method conserve inmutability an keep its efficiency O(1)?</i>
+            <i>Can a stack POP method conserve immutability an keep its efficiency O(1)?</i>
         </p>
         <p>
             <b>Memoization and referencial transparency:</b><br>
             Memoization is an otimization technique used to store the results of expensive function calls<br>
             Referential transparency is the possibility to replace a function by it's returning value<br><br>
-            When a function is pure and its parameters are inmutable, the memoization and referential transparency are possible<br>
+            When a function is pure and its parameters are immutable, the memoization and referential transparency are possible<br>
 
         </p>
         <div class="example">
@@ -74,7 +74,7 @@
                     }
                 </pre>
             </code>
-            Pure function with inmutable parameters:
+            Pure function with immutable parameters:
             <code>
                 <pre>
                     function sum(a, b) {
@@ -144,7 +144,7 @@
     <div id="Disadvantages">
         <h3>DISADVANTAGES</h3>
         <ul>
-            <li>Inmutability combined with recursion might lead to poorer performance</li>
+            <li>Immutability combined with recursion might lead to poorer performance</li>
             <li>Recursion or too dense code might lead to worse readability</li>
             <li>Sandwich principle or how to organize the impure code</li>
         </ul>

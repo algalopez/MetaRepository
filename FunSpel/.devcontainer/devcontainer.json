@@ -11,6 +11,7 @@
       "ms-python.python",
       "haskell.haskell",
       "justusadam.language-haskell",
+      "vscjava.vscode-java-pack",
       "ms-vsliveshare.vsliveshare"
     ],
     "settings": {
