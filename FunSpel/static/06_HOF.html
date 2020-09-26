@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>FunSpel Higher Order Functions</title>
+    <link rel="stylesheet" type="text/css" href="style_container.css">
+</head>
+
+<body>
+<div class="container">
+
+    <h2>HIGHER ORDER FUNCTIONS</h2>
+    <div class="subindex">
+        <p>
+            These are funtions that at least meet one of the following contitions.
+            <ol>
+                <li>Takes one or more functions as arguments </li>
+                <li>returns a function as its result.</li>
+            </ol>
+        index
+        <ul>
+            <li><a href="#map">Higher Order Functions</a></li>
+            <li><a href="#sort">Example</a></li>
+        </ul>   
+    </div>
+    <div id="functions">
+        <h3>HIGHER ORDER FUNCTIONS</h3>
+        Some of theses functions are quite common in languages with full or partial support of the functional paradigm<br>
+        <p>
+            <strong>Map</strong><br>
+            Takes a function f and a collection of elements as parameters<br>
+            Returns a new collection with f applied to each element<br>
+        </p>
+        <p>
+            <strong>Sort</strong><br>
+            Takes a comparing function and a collection of elements as functions<br>
+            Returns a new collection ordered
+        </p>
+        <p>
+            <strong>Filter</strong><br>
+            Takes a predicate function and a collection of elements<br>
+            Returns a new collection with the elements that return true to the given predicate
+        </p>
+        <p>
+            <strong>Reduce / Fold</strong><br>
+            Taks a 2 parameter function, a identity element and a collection of elements<br>
+            Recursively apply the function to each element and the accumulated value<br>
+            There are plenty of reduce functions. For example haskell offers at least: foldr, foldl, foldi, foldt<br>
+        
+            <pre>
+                &lambda;&gt;  foldr (\x y -&gt; concat [&quot;(&quot;,x,&quot;+&quot;,y,&quot;)&quot;]) &quot;0&quot; (map show [1..13])
+                    &quot;(1+(2+(3+(4+(5+(6+(7+(8+(9+(10+(11+(12+(13+0)))))))))))))&quot;
+ 
+                &lambda;&gt;  foldl (\x y -&gt; concat [&quot;(&quot;,x,&quot;+&quot;,y,&quot;)&quot;]) &quot;0&quot; (map show [1..13])
+                    &quot;(((((((((((((0+1)+2)+3)+4)+5)+6)+7)+8)+9)+10)+11)+12)+13)&quot;
+ 
+                &lambda;&gt;  foldt (\x y -&gt; concat [&quot;(&quot;,x,&quot;+&quot;,y,&quot;)&quot;]) &quot;0&quot; (map show [1..13])
+                    &quot;(((((1+2)+(3+4))+((5+6)+(7+8)))+(((9+10)+(11+12))+13))+0)&quot;
+ 
+                &lambda;&gt;  foldi (\x y -&gt; concat [&quot;(&quot;,x,&quot;+&quot;,y,&quot;)&quot;]) &quot;0&quot; (map show [1..13])
+                    &quot;(1+((2+3)+(((4+5)+(6+7))+((((8+9)+(10+11))+(12+13))+0))))&quot;
+            </pre>
+        </p>
+        <p>
+            <strong>Callback</strong><br>
+            An existing function that takes anorther function as a parameter<br>
+            Apply the function, usually after some other operations<br>
+        </p>
+        <p>
+            <strong>Other</strong><br>
+            From wikipedia: Function composition, apply, tree traversal, montague grammar, etc<br>
+        </p>
+    </div>
+    <div id="example">
+        <h3>EXAMPLE</h3>
+        <p>
+            Example of some HOF used in python<br>
+        </p>
+        <p>
+            Disclaimer: <br>
+            Although python provides some of this methofs, it is not a good practice to use them.<br>
+            The pythonic way preferes list comprohensions, closures and generators <a href="https://www.artima.com/weblogs/viewpost.jsp?thread=98196">(link)</a>
+        </p>
+        <div class="example">
+            <p> 
+                Example: <br>
+                Given 3 functions: add2, add10 and div2<br>
+                And a versioned algorithm:
+                <ul>
+                    <li>Version 1: add2</li>
+                    <li>Version 2: Version 1 then add2</li>
+                    <li>Version 3: Version 2 then div2 then add10</li>
+                </ul>
+                When applying algorith with version and data<br>
+                Then the ordered steps of the algorith will be executed
+            </p>
+            <code>
+                <pre>
+                    import logging
+                    import functools
+                    
+                    def compose(functions):
+                        return functools.reduce(lambda f, g: lambda x: f(g(x)), map(lambda x: x.get('function'), functions), lambda x: x)
+                    
+                    add_2_function = lambda element: element + 2
+                    add_10_function = lambda element:  element + 10
+                    div_2_function = lambda element: element / 2
+                    
+                    def apply1(version, data):
+                        sample_functions = list()
+                        sample_functions.append({'version':1, 'priority':1, 'function':add_2_function})
+                        sample_functions.append({'version':2, 'priority':1, 'function':add_10_function})
+                        sample_functions.append({'version':3, 'priority':10, 'function':add_10_function})
+                        sample_functions.append({'version':3, 'priority':5, 'function':div_2_function})
+                    
+                        functions_to_apply = filter(lambda x: version &gt;= x.get(&quot;version&quot;), sample_functions)
+                        ordered_functions_to_apply = sorted(functions_to_apply, key=lambda k: k['priority'], reverse=True) 
+                        return compose(ordered_functions_to_apply)(data)
+                    
+                    logging.basicConfig(level=logging.INFO, format=&quot;%(asctime)s: %(levelname)-8s &gt; %(message)s&quot;, datefmt=&quot;%I:%M:%S&quot;)
+                    if __name__ == '__main__':
+                        logging.info(&quot;Applying v%s to %s = %s&quot;, 1, 0, apply1(1, 0))
+                        logging.info(&quot;Applying v%s to %s = %s&quot;, 2, 0, apply1(2, 0))
+                        logging.info(&quot;Applying v%s to %s = %s&quot;, 3, 0, apply1(3, 0))
+                </pre>
+                <pre>
+                    root@0a7083dc702a:/funspel/06_HOF# python3 example.py 
+                    08:33:31: INFO     &gt; Applying v1 to 0 = 2
+                    08:33:31: INFO     &gt; Applying v2 to 0 = 12
+                    08:33:31: INFO     &gt; Applying v3 to 0 = 16.0
+                </pre>
+            </code>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="description" content="Functional Spel">
+        <meta name="author" content="algalopez">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <title>Algalopez - Currying</title>   
+    <script>
+
+        if (document.readyState == "loading") {
+            document.addEventListener('DOMContentLoaded', example);
+        } else {
+            example();
+        }
+
+        function sumAndMultiply(a, b, c) {
+            return (a+b)*c;
+        }
+
+        function curriedSumAndMultiply(a) {
+            return function(b) {
+                return function(c) {
+                    return (a+b)*c
+                }
+            };
+        }
+
+        function example() {
+            console.log("result1: " + sumAndMultiply(2,3,5));
+            console.log("result2: " + curriedSumAndMultiply(2)(3)(5));
+        }
+
+    </script>
+    
+    </head>
+    <body>
+        Open browser console
+    </body>
+</html>
+

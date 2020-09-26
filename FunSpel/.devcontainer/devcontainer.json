@@ -1,0 +1,29 @@
+{
+    "name": "FunSpel",
+    "build": {
+      "dockerfile": "Dockerfile_dev",
+      "context": "..",
+    },
+    "service": "funspel",
+    "workspaceFolder": "/funspel",
+    "mounts": ["source=${localWorkspaceFolder}/,target=/funspel/,type=bind,consistency=cached"],
+    "extensions": [
+      "ms-python.python",
+      "haskell.haskell",
+      "justusadam.language-haskell",
+      "vscjava.vscode-java-pack",
+      "ms-vsliveshare.vsliveshare"
+    ],
+    "settings": {
+      "workbench.tree.indent": 20,
+      "terminal.integrated.shell.linux": "/bin/bash",
+      "python.pythonPath": "/usr/local/bin/python",
+      "python.linting.enabled": true,
+      "python.linting.pylintEnabled": true,
+      "python.testing.unittestEnabled": true,
+      "python.testing.unittestArgs": ["-v", "-s", ".", "-p", "*_test.py"],
+      "python.testing.pytestEnabled": false,
+      "python.testing.nosetestsEnabled": false
+    },
+    "postCreateCommand": "pip3 install -r requirements.txt"
+  }

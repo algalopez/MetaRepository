@@ -1,0 +1,33 @@
+.container {
+    margin-top: 4px;
+    font-size: small;
+}
+
+h2 {
+    text-align: center;
+    margin-top: 2em;
+}
+
+h3 {
+    margin-top: 2em;
+}
+
+.subindex a:hover, 
+.subindex a:active, 
+.subindex a:link, 
+.subindex a:visited {
+    text-decoration:none;
+    color: #222222;
+}
+
+.example {
+    background-color: #EFF5EF;
+    border: 1px solid;
+    padding: 8px;
+}
+
+
+code {
+    display: block;
+    background-color: #F8F8F8;
+}

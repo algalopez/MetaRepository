@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>FunSpel Lenses</title>
+    <link rel="stylesheet" type="text/css" href="style_container.css">
+</head>
+
+<body>
+<div class="container">
+    <h2>LENSES</h2>
+    <div class="subindex">
+        <p>
+            Pattern to extract and update data from large immutable data structures
+        </p>
+        <ul>
+            <li><a href="#with">With</a></li>
+            <li><a href="#lens">Lens</a></li>
+            <li><a href="#creation">Lens creation</a></li>
+            <li><a href="#usage">Usage</a></li>
+        </ul>   
+    </div>
+    <div id="with">
+        <h3>WITH</h3>
+        For shallow data structures, using either the builder/with pattern is enough
+        <div class="example">
+            <p> 
+                Example: 
+                Given a deep immutable data structure<br>
+                Where: A TV Show has a name and a list of episodes, each with a name and a number<br>
+                Example: TvShow=
+                <pre>
+                {
+                    "name":Community, 
+                    "seasons":[
+                        {"number":1, "name":Pilot},
+                        {"number":2, "name":Spanish 101}
+                    ],[
+                        {"number":1, "name":Anthropology 101},
+                        {"number":2, "name":Accounting for Lawyers}
+                    ]
+                }
+                </pre>
+            </p>
+            <code>
+                <pre>
+                    public class TvShow {
+                        public final String name;
+                        public final List&lt;Season&gt; seasons;
+                        TvShow(String name, List&lt;Season&gt; seasons) { this.name = name; this.seasons = seasons;}
+                        public TvShow withName(String newName) { return new TvShow(newName, seasons);}
+                        public TvShow withSeasons(List&lt;Season&gt; newSeasons) { return new TvShow(name, newSeasons);}
+                        public TvShow withSeason(Integer index, Season newSeason) { 
+                            List&lt;Season&gt; newSeasons = IntStream.range(0 , this.seasons.size())
+                            .mapToObj(i -&gt; index.equals(i) ? newSeason : this.seasons.get(i))
+                            .collect(Collectors.toList());
+                            return new TvShow(name, newSeasons);
+                        }
+                        @Override public String toString() {  return &quot;TvShow={\&quot;name\&quot;:&quot; + name + &quot;, \&quot;seasons\&quot;:&quot; + seasons.stream().map(Object::toString).collect(Collectors.joining(&quot;,&quot;)) + &quot;}&quot;; }
+                    }
+                
+                    public class Season {
+                        public final List&lt;Episode&gt; episodes;
+                        Season(List&lt;Episode&gt; episodes) {this.episodes = episodes;}
+                        public Season withEpisodes(List&lt;Episode&gt; newEpisodes) { return new Season(newEpisodes); }
+                        public Season withEpisode(Integer index, Episode newEpisode) { 
+                            List&lt;Episode&gt; newEpisodes = IntStream.range(0 , this.episodes.size())
+                            .mapToObj(i -&gt; index.equals(i) ? newEpisode : this.episodes.get(i))
+                            .collect(Collectors.toList());
+                            return new Season(newEpisodes);
+                        }
+                        @Override public String toString() { return &quot;[&quot;+episodes.stream().map(Object::toString).collect(Collectors.joining(&quot;,&quot;))+&quot;]&quot;; }
+                    }
+                
+                    public class Episode {
+                        public final Integer number;
+                        public final String name;
+                        Episode(Integer number, String name) {this.number = number; this.name = name;}
+                        public Episode withNumber(Integer newNumber) {return new Episode(newNumber, this.name);}
+                        public Episode withName(String newName) {return new Episode(this.number, newName);}
+                        @Override public String toString() { return &quot;{\&quot;number\&quot;:&quot;+number+&quot;, \&quot;name\&quot;:&quot;+name+&quot;}&quot;; }
+                    }
+                </pre>
+            </code>
+        </div>
+    </div>
+    <div id="lens">
+        <h3>LENS</h3>
+        A lens with just a constructor, a compositionn function and 2 modifications
+        <div class="example">
+            <code>
+                <pre>
+                    public class Lens&lt;A, B&gt; {
+
+                        private final Function&lt;A, B&gt; getter;
+                        private final BiFunction&lt;A, B, A&gt; setter;
+                    
+                        public Lens(Function&lt;A, B&gt; getter, BiFunction&lt;A, B, A&gt; setter) { this.getter = getter; this.setter = setter; }
+                
+                        public Function&lt;A, A&gt; modify(UnaryOperator&lt;B&gt; mapper) {
+                            return oldValue -&gt; {
+                                B extracted = getter.apply(oldValue);
+                                B transformed = mapper.apply(extracted);
+                                return setter.apply(oldValue, transformed);
+                            };
+                        }
+                    
+                        public Function&lt;Function&lt;B, B&gt;, A&gt; modify(A oldValue) {
+                            return mapper -&gt; {
+                                B extracted = getter.apply(oldValue);
+                                B transformed = mapper.apply(extracted);
+                                return setter.apply(oldValue, transformed);
+                            };
+                        }
+                    
+                        // Form Lens&lt;A,B&gt; compose Lens&lt;B,C&gt; returns Lens&lt;A,C&gt;
+                        public &lt;C&gt; Lens&lt;A, C&gt; compose(Lens&lt;B, C&gt; other) {
+                            return new Lens&lt;&gt;(
+                                (A a) -&gt; getter.andThen(other.getter).apply(a),
+                                (A a, C c) -&gt; {
+                                    B b = getter.apply(a);
+                                    B newB = other.modify(ignored -&gt; c).apply(b);
+                                    return setter.apply(a, newB);
+                                }
+                            );
+                        }
+                    }
+                </pre>
+            </code>
+        </div>
+    </div>
+    <div id="creation">
+        <h3>CREATION</h3>
+            Actual lenses that modify the desired values
+        <div class="example">
+            <code>
+                <pre>
+                    class LensApplication {
+                        Lens&lt;TvShow, String&gt; tvShowNameLens = new Lens&lt;&gt;(t -&gt; t.name, TvShow::withName);
+                        Lens&lt;TvShow, List&lt;Season&gt;&gt; tvShowSeasonsLens = new Lens&lt;&gt;(t -&gt; t.seasons, TvShow::withSeasons);
+                        Lens&lt;Season, List&lt;Episode&gt;&gt; seasonEpisodesLens = new Lens&lt;&gt;(s -&gt; s.episodes, Season::withEpisodes);
+                        Lens&lt;Episode, String&gt; episodeNameLens = new Lens&lt;&gt;(s -&gt; s.name, Episode::withName);
+                        Lens&lt;Episode, Integer&gt; episodeNumberLens = new Lens&lt;&gt;(s -&gt; s.number, Episode::withNumber);
+                
+                        Lens&lt;TvShow, Season&gt; tvShowSeason0Lens  = new Lens&lt;&gt;(t -&gt; t.seasons.get(0), (tvShow, newSeason) -&gt; tvShow.withSeason(0, newSeason));
+                        Lens&lt;Season, Episode&gt; seasonEpisode0Lens  = new Lens&lt;&gt;(t -&gt; t.episodes.get(0), (season, newEpisode) -&gt; season.withEpisode(0, newEpisode));
+                
+                        Lens&lt;TvShow, List&lt;Episode&gt;&gt; tvShowSeason0EpisodesLens = tvShowSeason0Lens.compose(seasonEpisodesLens);
+                        Lens&lt;TvShow, Episode&gt; tvShowSeason0Episode0Lens = tvShowSeason0Lens.compose(seasonEpisode0Lens);
+                        Lens&lt;TvShow, String&gt; tvShowSeason0Episode0NameLens = tvShowSeason0Lens.compose(seasonEpisode0Lens).compose(episodeNameLens);
+                        Lens&lt;TvShow, Integer&gt; tvShowSeason0Episode0NumberLens = tvShowSeason0Lens.compose(seasonEpisode0Lens).compose(episodeNumberLens);
+                    }
+                </pre>
+            </code>
+        </div>
+    </div>
+    <div id="usage">
+        <h3>USAGE</h3>
+            Example of calls made to the lenses
+        <div class="example">
+            <code>
+                <pre>
+                    public static void main(String[] var0) {
+                        Lenses classWrapper = new Lenses();
+                        LensApplication lensApplication = classWrapper.new LensApplication();
+                
+                        TvShow community = classWrapper.new TvShowDataStub().getCommunityShow();
+                
+                        print(&quot;Original tvShow&quot;);
+                        print(community.toString());
+                        &gt&gt TvShow={"name":Community, "seasons":[{"number":1, "name":Pilot},{"number":2, "name":Spanish 101}],[{"number":1, "name":Anthropology 101},{"number":2, "name":Accounting for Lawyers}]}
+
+                        print(&quot;Change tvShow name&quot;);
+                        print(lensApplication.tvShowNameLens.modify(String::toUpperCase).apply(community));
+                        &gt&gt TvShow={"name":COMMUNITY, "seasons":[{"number":1, "name":Pilot},{"number":2, "name":Spanish 101}],[{"number":1, "name":Anthropology 101},{"number":2, "name":Accounting for Lawyers}]}
+
+                        print(&quot;Change tvShow -&gt; Season 0 -&gt; episodes &quot;);
+                        print(lensApplication.tvShowSeason0EpisodesLens.modify(ign -&gt; Arrays.asList(classWrapper.new Episode(2, &quot;Changing all season 0 episodes&quot;))).apply(community));
+                        &gt&gt TvShow={"name":Community, "seasons":[{"number":2, "name":Changing all season 0 episodes}],[{"number":1, "name":Anthropology 101},{"number":2, "name":Accounting for Lawyers}]}
+
+                        print(&quot;Change tvShow -&gt; Season 0 -&gt; episode 0&quot;);
+                        print(lensApplication.tvShowSeason0Episode0Lens.modify(ign -&gt; classWrapper.new Episode(2, &quot;New episode&quot;)).apply(community));
+                        &gt&gt TvShow={"name":Community, "seasons":[{"number":2, "name":New episode},{"number":2, "name":Spanish 101}],[{"number":1, "name":Anthropology 101},{"number":2, "name":Accounting for Lawyers}]}
+
+                        print(&quot;Change tvShow -&gt; Season 0 -&gt; episode 0 -&gt; name&quot;);
+                        print(lensApplication.tvShowSeason0Episode0NameLens.modify(ign -&gt; &quot;New name for episode&quot;).apply(community));
+                        &gt&gt TvShow={"name":Community, "seasons":[{"number":1, "name":New name for episode},{"number":2, "name":Spanish 101}],[{"number":1, "name":Anthropology 101},{"number":2, "name":Accounting for Lawyers}]}
+
+                        print(&quot;Change tvShow -&gt; Season 0 -&gt; episode 0 -&gt; number&quot;);
+                        print(lensApplication.tvShowSeason0Episode0NumberLens.modify(ign -&gt; 213).apply(community));
+                        &gt&gt TvShow={"name":Community, "seasons":[{"number":213, "name":Pilot},{"number":2, "name":Spanish 101}],[{"number":1, "name":Anthropology 101},{"number":2, "name":Accounting for Lawyers}]}
+                    }
+                </pre>
+            </code>
+        </div>
+    </div>   
+</div>
+</body>
+</html>
