@@ -21,6 +21,6 @@ function start() {
 
 function load_page(page) {
     console.log("Loading page" + page);
-    document.getElementById('iframe').src = page;
+    document.getElementById('iframe').src = "static/"+page;
 }
 

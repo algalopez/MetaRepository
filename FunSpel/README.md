@@ -17,9 +17,9 @@ This mini project is my attempt to use the Feynmann technique to learning the ba
 
 ### Documentation
 
-Open static/index.html in a browser and navigate throgh the index.
+Open /index.html in a browser and navigate throgh the index.
 
-Tested in Firefox
+Tested in Firefox 81
 
 ### Examples
 
