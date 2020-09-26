@@ -21,12 +21,13 @@ h3 {
 }
 
 .example {
-    background-color: #ECECEC;
+    background-color: #EFF5EF;
     border: 1px solid;
     padding: 8px;
 }
 
+
 code {
     display: block;
-    background-color: #ECECEC;
+    background-color: #F8F8F8;
 }

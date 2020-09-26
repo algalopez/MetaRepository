@@ -62,14 +62,14 @@
                 <pre>
                     // initially called with low = 0, high = N-1
                     BinarySearch(A[0..N-1], value, low, high) {
-                        // invariants: value > A[i] for all i < low
-                                       value < A[i] for all i > high
-                        if (high < low)
-                            return not_found // value would be inserted at index "low"
+                        // invariants: value &gt; A[i] for all i &lt; low
+                                       value &lt; A[i] for all i &gt; high
+                        if (high &lt; low)
+                            return not_found // value would be inserted at index &quot;low&quot;
                         mid = (low + high) / 2
-                        if (A[mid] > value)
+                        if (A[mid] &gt; value)
                             return BinarySearch(A, value, low, mid-1)
-                        else if (A[mid] < value)
+                        else if (A[mid] &lt; value)
                             return BinarySearch(A, value, mid+1, high)
                         else
                             return mid

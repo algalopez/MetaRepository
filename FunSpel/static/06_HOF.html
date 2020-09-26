@@ -25,50 +25,49 @@
     </div>
     <div id="functions">
         <h3>HIGHER ORDER FUNCTIONS</h3>
-
         Some of theses functions are quite common in languages with full or partial support of the functional paradigm<br>
         <p>
-            <b>Map</b><br>
+            <strong>Map</strong><br>
             Takes a function f and a collection of elements as parameters<br>
             Returns a new collection with f applied to each element<br>
         </p>
         <p>
-            <b>Sort</b><br>
+            <strong>Sort</strong><br>
             Takes a comparing function and a collection of elements as functions<br>
             Returns a new collection ordered
         </p>
         <p>
-            <b>Filter</b><br>
+            <strong>Filter</strong><br>
             Takes a predicate function and a collection of elements<br>
             Returns a new collection with the elements that return true to the given predicate
         </p>
         <p>
-            <b>Reduce / Fold</b><br>
+            <strong>Reduce / Fold</strong><br>
             Taks a 2 parameter function, a identity element and a collection of elements<br>
             Recursively apply the function to each element and the accumulated value<br>
             There are plenty of reduce functions. For example haskell offers at least: foldr, foldl, foldi, foldt<br>
         
             <pre>
-                λ>  foldr (\x y -> concat ["(",x,"+",y,")"]) "0" (map show [1..13])
-                    "(1+(2+(3+(4+(5+(6+(7+(8+(9+(10+(11+(12+(13+0)))))))))))))"
+                &lambda;&gt;  foldr (\x y -&gt; concat [&quot;(&quot;,x,&quot;+&quot;,y,&quot;)&quot;]) &quot;0&quot; (map show [1..13])
+                    &quot;(1+(2+(3+(4+(5+(6+(7+(8+(9+(10+(11+(12+(13+0)))))))))))))&quot;
  
-                λ>  foldl (\x y -> concat ["(",x,"+",y,")"]) "0" (map show [1..13])
-                    "(((((((((((((0+1)+2)+3)+4)+5)+6)+7)+8)+9)+10)+11)+12)+13)"
+                &lambda;&gt;  foldl (\x y -&gt; concat [&quot;(&quot;,x,&quot;+&quot;,y,&quot;)&quot;]) &quot;0&quot; (map show [1..13])
+                    &quot;(((((((((((((0+1)+2)+3)+4)+5)+6)+7)+8)+9)+10)+11)+12)+13)&quot;
  
-                λ>  foldt (\x y -> concat ["(",x,"+",y,")"]) "0" (map show [1..13])
-                    "(((((1+2)+(3+4))+((5+6)+(7+8)))+(((9+10)+(11+12))+13))+0)"
+                &lambda;&gt;  foldt (\x y -&gt; concat [&quot;(&quot;,x,&quot;+&quot;,y,&quot;)&quot;]) &quot;0&quot; (map show [1..13])
+                    &quot;(((((1+2)+(3+4))+((5+6)+(7+8)))+(((9+10)+(11+12))+13))+0)&quot;
  
-                λ>  foldi (\x y -> concat ["(",x,"+",y,")"]) "0" (map show [1..13])
-                    "(1+((2+3)+(((4+5)+(6+7))+((((8+9)+(10+11))+(12+13))+0))))"
+                &lambda;&gt;  foldi (\x y -&gt; concat [&quot;(&quot;,x,&quot;+&quot;,y,&quot;)&quot;]) &quot;0&quot; (map show [1..13])
+                    &quot;(1+((2+3)+(((4+5)+(6+7))+((((8+9)+(10+11))+(12+13))+0))))&quot;
             </pre>
         </p>
         <p>
-            <b>Callback</b><br>
+            <strong>Callback</strong><br>
             An existing function that takes anorther function as a parameter<br>
             Apply the function, usually after some other operations<br>
         </p>
         <p>
-            <b>Other</b><br>
+            <strong>Other</strong><br>
             From wikipedia: Function composition, apply, tree traversal, montague grammar, etc<br>
         </p>
     </div>
@@ -114,21 +113,21 @@
                         sample_functions.append({'version':3, 'priority':10, 'function':add_10_function})
                         sample_functions.append({'version':3, 'priority':5, 'function':div_2_function})
                     
-                        functions_to_apply = filter(lambda x: version >= x.get("version"), sample_functions)
+                        functions_to_apply = filter(lambda x: version &gt;= x.get(&quot;version&quot;), sample_functions)
                         ordered_functions_to_apply = sorted(functions_to_apply, key=lambda k: k['priority'], reverse=True) 
                         return compose(ordered_functions_to_apply)(data)
                     
-                    logging.basicConfig(level=logging.INFO, format="%(asctime)s: %(levelname)-8s > %(message)s", datefmt="%I:%M:%S")
+                    logging.basicConfig(level=logging.INFO, format=&quot;%(asctime)s: %(levelname)-8s &gt; %(message)s&quot;, datefmt=&quot;%I:%M:%S&quot;)
                     if __name__ == '__main__':
-                        logging.info("Applying v%s to %s = %s", 1, 0, apply1(1, 0))
-                        logging.info("Applying v%s to %s = %s", 2, 0, apply1(2, 0))
-                        logging.info("Applying v%s to %s = %s", 3, 0, apply1(3, 0))
+                        logging.info(&quot;Applying v%s to %s = %s&quot;, 1, 0, apply1(1, 0))
+                        logging.info(&quot;Applying v%s to %s = %s&quot;, 2, 0, apply1(2, 0))
+                        logging.info(&quot;Applying v%s to %s = %s&quot;, 3, 0, apply1(3, 0))
                 </pre>
                 <pre>
                     root@0a7083dc702a:/funspel/06_HOF# python3 example.py 
-                    08:33:31: INFO     > Applying v1 to 0 = 2
-                    08:33:31: INFO     > Applying v2 to 0 = 12
-                    08:33:31: INFO     > Applying v3 to 0 = 16.0
+                    08:33:31: INFO     &gt; Applying v1 to 0 = 2
+                    08:33:31: INFO     &gt; Applying v2 to 0 = 12
+                    08:33:31: INFO     &gt; Applying v3 to 0 = 16.0
                 </pre>
             </code>
         </div>

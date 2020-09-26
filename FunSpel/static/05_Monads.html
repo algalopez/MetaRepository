@@ -32,26 +32,26 @@
     <div id="introduction">
         <h3>INTRODUCTION</h3>
         <p>
-            A monad acts as a <b>container</b> that abstracts details about a computation, and let us focus more on what we want to do with the contained values.<br>
+            A monad acts as a <strong>container</strong> that abstracts details about a computation, and let us focus more on what we want to do with the contained values.<br>
             Example of monads depending on a detail of a computation:
             <ul>
-                <li><b>Maybe: </b>The value might not exist</li>
-                <li><b>List: </b>There might be more than one value</li>
-                <li><b>IO: </b>Getting the value involves some king of IO operation</li>
-                <li><b>Future: </b>The value might exist eventually in the future</li>
-                <li><b>State: </b>The value might depend on some kind of outside world state</li>
+                <li><strong>Maybe: </strong>The value might not exist</li>
+                <li><strong>List: </strong>There might be more than one value</li>
+                <li><strong>IO: </strong>Getting the value involves some king of IO operation</li>
+                <li><strong>Future: </strong>The value might exist eventually in the future</li>
+                <li><strong>State: </strong>The value might depend on some kind of outside world state</li>
             </ul>
         </p>
         <p>
-            A monad <b>define operations</b> to work on that container<br>
+            A monad <strong>define operations</strong> to work on that container<br>
             Example of operations:
             <ul>
-                <li><b>Return: </b>Wrap a value inside a monad to have a monadic value</li>
-                <li><b>Fmap: </b>Apply a function to a monadic value without pulling it out</li>
-                <li><b>Join: </b>Flatten a nested monad</li>
-                <li><b>Bind or chain (>>=): </b>Pull out the value from the monad and use it in a function</li>
-                <li><b>LiftM: </b>Upgrading a function that accepts values so it can accept monadic values</li>
-                <li><b>Monadic compose (>=>): </b>Compose functions</li>
+                <li><strong>Return: </strong>Wrap a value inside a monad to have a monadic value</li>
+                <li><strong>Fmap: </strong>Apply a function to a monadic value without pulling it out</li>
+                <li><strong>Join: </strong>Flatten a nested monad</li>
+                <li><strong>Bind or chain (&gt;&gt;=): </strong>Pull out the value from the monad and use it in a function</li>
+                <li><strong>LiftM: </strong>Upgrading a function that accepts values so it can accept monadic values</li>
+                <li><strong>Monadic compose (&gt;=&gt;): </strong>Compose functions</li>
             </ul>
         </p>
         <div id="functions">
@@ -59,13 +59,13 @@
             <div>
                 <p>Return</p>
                 In Haskell, return wraps the value inside a monad of the context (IO)
-                Note: $ = Function application (($) :: (a -> b) -> a -> b)
+                Note: $ = Function application (($) :: (a -&gt; b) -&gt; a -&gt; b)
                 <code>
                     <pre>
-                        simpleTwice :: String -> String
+                        simpleTwice :: String -&gt; String
                         simpleTwice word = word ++ " " ++ word
 
-                        monadicTwice :: String -> IO String
+                        monadicTwice :: String -&gt; IO String
                         monadicTwice word = return $ simpleTwice word
                     </pre>
                 </code>
@@ -75,7 +75,7 @@
                 It pulls out the value, the value is used somewere, it puts the value back in the monad
                 <code>
                     <pre>
-                        upper :: String -> String
+                        upper :: String -&gt; String
                         upper = map toUpper
 
                         maybeValue :: Maybe String
@@ -110,7 +110,7 @@
                         Prelude> let maybeDouble x = Just (x + x)
                         Prelude> fmap maybeDouble (makeMaybe 10)
                         Just (Just 20)
-                        Prelude> makeMaybe 10 >>= maybeDouble
+                        Prelude> makeMaybe 10 &gt;&gt;= maybeDouble
                         Just 20
                     </pre>
                 </code>
@@ -122,10 +122,10 @@
                         monadicValueA = Just 20
                         monadicValueB = Just 30
 
-                        add :: Int -> Int -> Int
+                        add :: Int -&gt; Int -&gt; Int
                         add x y = x + y
                         
-                        monadicAdd :: Maybe Int -> Maybe Int -> Maybe Int
+                        monadicAdd :: Maybe Int -&gt; Maybe Int -&gt; Maybe Int
                         monadicAdd = liftM2 add
                         
                         main :: IO ()
@@ -135,22 +135,22 @@
             </div>
             <div>
                 <p>Monadic compose</p>
-                <ul><li>(B -> Monad C) -> (A -> Monad B) -> (A -> Monad C)</li></ul>
+                <ul><li>(B -&gt; Monad C) -&gt; (A -&gt; Monad B) -&gt; (A -&gt; Monad C)</li></ul>
                 <code>
                     <pre>
-                        f1 :: Int -> Maybe String
+                        f1 :: Int -&gt; Maybe String
                         f1 x
-                          | x > 10 = Just "I have a hat!"
+                          | x &gt; 10 = Just "I have a hat!"
                           | otherwise = Nothing
                           
-                        equalsA :: Char -> Bool
+                        equalsA :: Char -&gt; Bool
                         equalsA c = c == 'a'
                         
-                        f2 :: String -> Maybe Bool
+                        f2 :: String -&gt; Maybe Bool
                         f2 str = Just $ any equalsA str
                           
-                        f3 :: Int -> Maybe Bool
-                        f3 = f1 >=> f2
+                        f3 :: Int -&gt; Maybe Bool
+                        f3 = f1 &gt;=&gt; f2
                         
                         main :: IO ()
                         main = print $ f3 20
