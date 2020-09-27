@@ -16,7 +16,8 @@ function start() {
     document.getElementById("monads").addEventListener("click", function(){load_page('05_Monads.html')});
     document.getElementById("hof").addEventListener("click", function(){load_page('06_HOF.html')});
     document.getElementById("lenses").addEventListener("click", function(){load_page('07_Lenses.html')});
-    document.getElementById("bibliography").addEventListener("click", function(){load_page('08_Bibliography.html')});
+    document.getElementById("lambdaCalculus").addEventListener("click", function(){load_page('08_LambdaCalculus.html')});
+    document.getElementById("bibliography").addEventListener("click", function(){load_page('09_Bibliography.html')});
  }
 
 function load_page(page) {

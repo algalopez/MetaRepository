@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>FunSpel Lambda Calculus</title>
+    <link rel="stylesheet" type="text/css" href="style_container.css">
+</head>
+
+<body>
+<div class="container">
+
+    <h2>LAMBDA CALCULUS</h2>
+    <div class="subindex">
+        <p>
+            Formal system design to research about the definition of functions.<br>
+            Lambda calculus is equivalent to the Turing machine, therefore everything can be functions
+        </p>
+        <ul>
+            <li><a href="#syntax">Syntax</a></li>
+            <li><a href="#reductions">Reductions</a></li>
+            <li><a href="#conversions">Conversions</a></li>
+            <li><a href="#combinators">Combinators</a>
+            </li>
+        </ul>   
+    </div>
+    <div id="syntax">
+        <h3>SYNTAX</h3>
+        It has a small syntax from which to build more complex expressions using combinatory logic
+        <p>
+            <code>
+                <pre>
+                    expression:== variable                      <em>identifyer</em>
+                                | expression expression         <em>Application</em>
+                                | &lambda;x . expression               <em>Abstraction</em>
+                                | ( expression )                <em>Grouping</em>
+                </pre>
+            </code>
+        </p>
+        <div class="example">
+            Example:
+            <code>
+                <pre>
+                    a =&gt; b =&gt; a
+                    &lambda;ab.a     
+                </pre>
+            </code>
+        </div>
+    </div>
+    <div id="reductions">
+        <h3>REDUCTIONS</h3>
+        <p>
+            <strong>&Beta;-Reduction</strong><br>
+            Evaluate the function application to reduce expressions
+            <pre>
+                ((&lambda;a.a)&lambda;b.&lambda;c.b)(x)&lambda;e.f
+                (&lambda;b.&lambda;c.b) (x)&lambda;e.f
+                (&lambda;c.x) &lambda;e.f
+                x === Beta normal form
+            </pre>
+        </p>
+    </div>
+    <div id="conversions">
+        <h3>CONVERSIONS</h3>
+        <p>
+            <strong>&Alpha;-Conversion: </strong>Changing bound variables<br>
+            <strong>&Eta;-Conversion: </strong>Removing unused variable<br>
+        </p>
+    </div>
+    <div id="combinators">
+        <h3>COMBINATORS</h3>
+        Functions with no free variables<br>
+        Just with the kestrel and the Starling combinators, it is possible to build everything
+        <p>
+            <strong>Mockingbird-Combinator (M or &Omega;): </strong>&lambda;f.ff<br>
+            Self application<br> f(I) = I, F(F) = infinite recursion<br>
+            Since we cannot know if the expression will take a normal beta form, we don't know if the expression will recurse infinitely (The halting problem)
+        </p>
+        <p>
+            <strong>Kestrel-Combinator (K): </strong>&lambda;ab.a<br>
+            In haskell is written as const. 
+            <pre>
+                kestrel(1)
+            </pre>
+            <strong>Kite-Combinator (KI): </strong>&lambda;ab.b<br>
+            It can be derived from kestrel
+            <pre>
+                kestrel(I)(1)(2)
+            </pre>
+        </p>
+        <p>
+            <strong>Cardinal-Combinator (C): </strong>&lambda;fab.fba<br>
+            Flip arguments passed to a function<br>
+            Cardinal of the kestral if the Kite: C(K)(a)(b) = KI(a)(b)
+        </p>
+        <p>
+            <strong>Other combinators</strong>
+            <ul>
+                <li>Y-Combinator: &lambda;f.(&lambda;x.fxx)(&lambda;x.fxx): Fixed point combinator. Used to formally describe recursive functions in a language that do not support recusrsion</li>
+                <li>Bluebird-Combinator: &lambda;fga.f(ga): Composition 1</li>
+                <li>Blackbird-Combinator: &lambda;fgab.f(gab): Composition 2</li>
+                <li>Thrust-Combinator: &lambda;af.fa: Hold an argument</li>
+                <li>Vireo-Combinator: &lambda;fabf.fab: Hold a pair of arguments</li>
+                <li>Starling-Combinator: &lambda;abc.ac(bc)</li>
+            </ul>
+        </p>
+        <div class="example">
+            <p> 
+                Example: !x == y || (a %% z)
+            </p>
+            <code>
+                Church encodings:
+                <pre>
+                    TRUE:= K
+                    FALSE:= KI
+
+                    NOT:= &lambda;p.p FALSE TRUE    -- Where p is a boolean (either kestrel or kite)
+                    NOT:= C
+
+                    AND:= &lambda;pq.pqp            -- Ex, p is either TRUE or FASE. If p is FALSE then it is a Kite and returns itself(FALSE) Otherwise return P 
+                    OR:= &lambda;pq.ppq             -- If p is True, returns K(K)(KI) => K, else returns KI(KI)(q) => q
+
+                    EQUALS:= &lambda;pq.pq(NOTq)
+
+                    With B-Redection:
+                    (&lambda;pq.ppq)xy
+                    xxy
+
+                    So:
+                    EQUALS (NOT (AND p q)) (OR (NOT p) (NOT q))
+                    ((&lambda;f.ff) ((&lambda;fab.fba) p) ((&lambda;fab.fba) q))
+                </pre>
+            </code>
+        </div>
+    </div>
+</div>
+</body>
+</html>
