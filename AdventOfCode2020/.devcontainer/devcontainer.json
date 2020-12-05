@@ -1,0 +1,27 @@
+{
+    "name": "AunadventOfCode2020Spel",
+    "build": {
+      "dockerfile": "Dockerfile_dev",
+      "context": "..",
+    },
+    "service": "adventOfCode2020",
+    "workspaceFolder": "/adventOfCode2020",
+    "mounts": ["source=${localWorkspaceFolder}/,target=/adventOfCode2020/,type=bind,consistency=cached"],
+    "extensions": [
+      "ms-python.python",
+      "vscjava.vscode-java-pack",
+      "ms-vsliveshare.vsliveshare"
+    ],
+    "settings": {
+      "workbench.tree.indent": 20,
+      "terminal.integrated.shell.linux": "/bin/bash",
+      "python.pythonPath": "/usr/local/bin/python",
+      "python.linting.enabled": true,
+      "python.linting.pylintEnabled": true,
+      "python.testing.unittestEnabled": true,
+      "python.testing.unittestArgs": ["-v", "-s", ".", "-p", "*_test.py"],
+      "python.testing.pytestEnabled": false,
+      "python.testing.nosetestsEnabled": false
+    },
+    "postCreateCommand": "pip3 install -r requirements.txt"
+  }
