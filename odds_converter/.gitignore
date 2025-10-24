@@ -1,0 +1,45 @@
+# Compiled Haskell executables
+convert
+test-main
+test-oddslib
+
+# Haskell compilation artifacts
+*.hi
+*.o
+*.dyn_hi
+*.dyn_o
+
+# GHC temp files
+*.prof
+*.aux
+*.hp
+*.eventlog
+
+# Stack build artifacts (if using Stack)
+.stack-work/
+
+# Cabal build artifacts (if using Cabal)
+dist/
+dist-newstyle/
+cabal.project.local
+cabal.project.local~
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp

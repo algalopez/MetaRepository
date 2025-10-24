@@ -1,0 +1,24 @@
+{
+    "name": "1_odds",
+    "build": {
+        "dockerfile": "dockerfile_dev",
+        "context": ".."
+      },
+    "workspaceFolder": "/1_odds",
+    "mounts": ["source=${localWorkspaceFolder}/,target=/1_odds/,type=bind,consistency=cached"],
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "haskell.haskell",
+                "justusadam.language-haskell"
+            ],
+            "settings": {
+                "workbench.tree.indent": 20,
+                "terminal.integrated.shell.linux": "/bin/bash"
+            }
+        }
+    },
+    "features": {
+        "ghcr.io/devcontainers/features/git:1": {}
+    }
+}
