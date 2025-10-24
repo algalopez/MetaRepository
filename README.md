@@ -8,9 +8,9 @@ Collection of small projects
 
 | Project             	 |          Language          | Description                                                                                      |
 |-----------------------|:--------------------------:|:-------------------------------------------------------------------------------------------------|
-| GeneticAlgoritm     	 |           Python           | Simple genetic algorithm                                                                         |
+| GeneticAlgorithm    	 |           Python           | Simple genetic algorithm                                                                         |
 | RebeccaEncryption   	 |           Python           | Encryption and decryption book algorithm                                                         |
 | StateMachinePuzzle  	 |            None            | Puzzle made with logic doors, flipflops, etc                                                     |
 | FunSpel             	 | Haskell, Python, Java, Web | Introduction to functional programming                                                           |
 | AdventOfCode        	 |           Python           | Some christmas challenges from [Advent of Code](https://adventofcode.com/2020)                   |
-| odds_converter        |          Haskell           | Vibe coded project to convert between Decimal, Fractional, American and Implied probability odds |
+| oddsConverter         |          Haskell           | Vibe coded project to convert between Decimal, Fractional, American and Implied probability odds |
