@@ -5,6 +5,48 @@ import Time
 import Debug
 
 
+-- WIN DETECTION
+
+-- All possible winning combinations (using 0-based indices)
+winningCombinations : List (List Int)
+winningCombinations =
+    [ [0, 1, 2]  -- Top horizontal (squares 1, 2, 3)
+    , [3, 4, 5]  -- Middle horizontal (squares 4, 5, 6)
+    , [6, 7, 8]  -- Bottom horizontal (squares 7, 8, 9)
+    , [0, 3, 6]  -- Left vertical (squares 1, 4, 7)
+    , [1, 4, 7]  -- Middle vertical (squares 2, 5, 8)
+    , [2, 5, 8]  -- Right vertical (squares 3, 6, 9)
+    , [0, 4, 8]  -- Diagonal (squares 1, 5, 9)
+    , [2, 4, 6]  -- Diagonal (squares 3, 5, 7)
+    ]
+
+checkWinner : List Target -> Maybe Player
+checkWinner targets =
+    let
+        -- Check if a specific player has won
+        hasPlayerWon : Player -> Bool
+        hasPlayerWon player =
+            let
+                -- Get indices of targets hit by this player
+                hitIndices = 
+                    targets
+                        |> List.filter (\t -> t.hitBy == Just player)
+                        |> List.map .id
+                
+                -- Check if any winning combination is satisfied
+                hasWinningCombo combo =
+                    List.all (\idx -> List.member idx hitIndices) combo
+            in
+            List.any hasWinningCombo winningCombinations
+    in
+    if hasPlayerWon PlayerA then
+        Just PlayerA
+    else if hasPlayerWon PlayerB then
+        Just PlayerB
+    else
+        Nothing
+
+
 -- SHOOTING AND PHYSICS
 
 shootTomato : Model -> ( Model, Cmd Msg )
@@ -199,12 +241,21 @@ updateProjectiles newTime model =
             model.targets
                 |> List.map updateTargetWithHits
                 |> List.map updateTargetPosition
+        
+        -- Check if there's a winner after updating targets
+        winner = checkWinner updatedTargets
+        
+        newGameState = 
+            case winner of
+                Just player -> GameOver player
+                Nothing -> model.gameState
     in 
     ( { model
         | projectiles = updatedProjectiles
             |> List.filter .active
         , targets = updatedTargets
         , lastTime = time
+        , gameState = newGameState
       }
     , Cmd.none
     )

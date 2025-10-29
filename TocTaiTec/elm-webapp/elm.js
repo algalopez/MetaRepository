@@ -5776,24 +5776,27 @@ var $elm$browser$Browser$Events$onKeyUp = A2($elm$browser$Browser$Events$on, $el
 var $elm$json$Json$Decode$string = _Json_decodeString;
 var $author$project$Main$subscriptions = function (model) {
 	var _v0 = model.gameState;
-	if (_v0.$ === 'Playing') {
-		return $elm$core$Platform$Sub$batch(
-			_List_fromArray(
-				[
-					$elm$browser$Browser$Events$onKeyDown(
-					A2(
-						$elm$json$Json$Decode$map,
-						$author$project$Game$Types$KeyPressed,
-						A2($elm$json$Json$Decode$field, 'key', $elm$json$Json$Decode$string))),
-					$elm$browser$Browser$Events$onKeyUp(
-					A2(
-						$elm$json$Json$Decode$map,
-						$author$project$Game$Types$KeyReleased,
-						A2($elm$json$Json$Decode$field, 'key', $elm$json$Json$Decode$string))),
-					$elm$browser$Browser$Events$onAnimationFrame($author$project$Game$Types$Tick)
-				]));
-	} else {
-		return $elm$core$Platform$Sub$none;
+	switch (_v0.$) {
+		case 'Playing':
+			return $elm$core$Platform$Sub$batch(
+				_List_fromArray(
+					[
+						$elm$browser$Browser$Events$onKeyDown(
+						A2(
+							$elm$json$Json$Decode$map,
+							$author$project$Game$Types$KeyPressed,
+							A2($elm$json$Json$Decode$field, 'key', $elm$json$Json$Decode$string))),
+						$elm$browser$Browser$Events$onKeyUp(
+						A2(
+							$elm$json$Json$Decode$map,
+							$author$project$Game$Types$KeyReleased,
+							A2($elm$json$Json$Decode$field, 'key', $elm$json$Json$Decode$string))),
+						$elm$browser$Browser$Events$onAnimationFrame($author$project$Game$Types$Tick)
+					]));
+		case 'Landing':
+			return $elm$core$Platform$Sub$none;
+		default:
+			return $elm$core$Platform$Sub$none;
 	}
 };
 var $author$project$Game$Types$Playing = {$: 'Playing'};
@@ -5856,9 +5859,40 @@ var $author$project$Main$startLoading = function (slingshot) {
 		slingshot,
 		{isLoading: true});
 };
+var $author$project$Game$Types$GameOver = function (a) {
+	return {$: 'GameOver', a: a};
+};
 var $elm$core$Basics$abs = function (n) {
 	return (n < 0) ? (-n) : n;
 };
+var $elm$core$List$any = F2(
+	function (isOkay, list) {
+		any:
+		while (true) {
+			if (!list.b) {
+				return false;
+			} else {
+				var x = list.a;
+				var xs = list.b;
+				if (isOkay(x)) {
+					return true;
+				} else {
+					var $temp$isOkay = isOkay,
+						$temp$list = xs;
+					isOkay = $temp$isOkay;
+					list = $temp$list;
+					continue any;
+				}
+			}
+		}
+	});
+var $elm$core$List$all = F2(
+	function (isOkay, list) {
+		return !A2(
+			$elm$core$List$any,
+			A2($elm$core$Basics$composeL, $elm$core$Basics$not, isOkay),
+			list);
+	});
 var $elm$core$List$filter = F2(
 	function (isGood, list) {
 		return A3(
@@ -5870,6 +5904,61 @@ var $elm$core$List$filter = F2(
 			_List_Nil,
 			list);
 	});
+var $elm$core$List$member = F2(
+	function (x, xs) {
+		return A2(
+			$elm$core$List$any,
+			function (a) {
+				return _Utils_eq(a, x);
+			},
+			xs);
+	});
+var $author$project$Game$Physics$winningCombinations = _List_fromArray(
+	[
+		_List_fromArray(
+		[0, 1, 2]),
+		_List_fromArray(
+		[3, 4, 5]),
+		_List_fromArray(
+		[6, 7, 8]),
+		_List_fromArray(
+		[0, 3, 6]),
+		_List_fromArray(
+		[1, 4, 7]),
+		_List_fromArray(
+		[2, 5, 8]),
+		_List_fromArray(
+		[0, 4, 8]),
+		_List_fromArray(
+		[2, 4, 6])
+	]);
+var $author$project$Game$Physics$checkWinner = function (targets) {
+	var hasPlayerWon = function (player) {
+		var hitIndices = A2(
+			$elm$core$List$map,
+			function ($) {
+				return $.id;
+			},
+			A2(
+				$elm$core$List$filter,
+				function (t) {
+					return _Utils_eq(
+						t.hitBy,
+						$elm$core$Maybe$Just(player));
+				},
+				targets));
+		var hasWinningCombo = function (combo) {
+			return A2(
+				$elm$core$List$all,
+				function (idx) {
+					return A2($elm$core$List$member, idx, hitIndices);
+				},
+				combo);
+		};
+		return A2($elm$core$List$any, hasWinningCombo, $author$project$Game$Physics$winningCombinations);
+	};
+	return hasPlayerWon($author$project$Game$Types$PlayerA) ? $elm$core$Maybe$Just($author$project$Game$Types$PlayerA) : (hasPlayerWon($author$project$Game$Types$PlayerB) ? $elm$core$Maybe$Just($author$project$Game$Types$PlayerB) : $elm$core$Maybe$Nothing);
+};
 var $elm$core$Basics$ge = _Utils_ge;
 var $elm$core$List$head = function (list) {
 	if (list.b) {
@@ -5914,20 +6003,20 @@ var $author$project$Game$Physics$updateProjectiles = F2(
 		var updateTargetPosition = function (target) {
 			var newY = target.y + (target.velocityY * deltaTime);
 			var newX = target.x + (target.velocityX * deltaTime);
-			var _v1 = (newY <= 0) ? _Utils_Tuple2(
+			var _v2 = (newY <= 0) ? _Utils_Tuple2(
 				0,
 				$elm$core$Basics$abs(target.velocityY)) : ((newY >= 100) ? _Utils_Tuple2(
 				100,
 				-$elm$core$Basics$abs(target.velocityY)) : _Utils_Tuple2(newY, target.velocityY));
-			var finalY = _v1.a;
-			var finalVelY = _v1.b;
-			var _v2 = (newX <= 0) ? _Utils_Tuple2(
+			var finalY = _v2.a;
+			var finalVelY = _v2.b;
+			var _v3 = (newX <= 0) ? _Utils_Tuple2(
 				0,
 				$elm$core$Basics$abs(target.velocityX)) : ((newX >= 100) ? _Utils_Tuple2(
 				100,
 				-$elm$core$Basics$abs(target.velocityX)) : _Utils_Tuple2(newX, target.velocityX));
-			var finalX = _v2.a;
-			var finalVelX = _v2.b;
+			var finalX = _v3.a;
+			var finalVelX = _v3.b;
 			return _Utils_update(
 				target,
 				{velocityX: finalVelX, velocityY: finalVelY, x: finalX, y: finalY});
@@ -5966,10 +6055,20 @@ var $author$project$Game$Physics$updateProjectiles = F2(
 			$elm$core$List$map,
 			updateTargetPosition,
 			A2($elm$core$List$map, updateTargetWithHits, model.targets));
+		var winner = $author$project$Game$Physics$checkWinner(updatedTargets);
+		var newGameState = function () {
+			if (winner.$ === 'Just') {
+				var player = winner.a;
+				return $author$project$Game$Types$GameOver(player);
+			} else {
+				return model.gameState;
+			}
+		}();
 		return _Utils_Tuple2(
 			_Utils_update(
 				model,
 				{
+					gameState: newGameState,
 					lastTime: time,
 					projectiles: A2(
 						$elm$core$List$filter,
@@ -6327,6 +6426,71 @@ var $elm$html$Html$Events$onClick = function (msg) {
 		'click',
 		$elm$json$Json$Decode$succeed(msg));
 };
+var $author$project$Main$viewGameOver = F2(
+	function (winner, model) {
+		var _v0 = function () {
+			if (winner.$ === 'PlayerA') {
+				return _Utils_Tuple2('Player A', '#4CAF50');
+			} else {
+				return _Utils_Tuple2('Player B', '#f44336');
+			}
+		}();
+		var winnerName = _v0.a;
+		var winnerColor = _v0.b;
+		return A2(
+			$elm$html$Html$div,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$class('game')
+				]),
+			_List_fromArray(
+				[
+					$author$project$Main$viewGameInfo(model),
+					$author$project$Main$viewGameArea(model),
+					A2($author$project$Main$viewSlingshot, model.currentPlayer, model.slingshot),
+					A2(
+					$elm$html$Html$div,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class('game-over-overlay')
+						]),
+					_List_fromArray(
+						[
+							A2(
+							$elm$html$Html$div,
+							_List_fromArray(
+								[
+									$elm$html$Html$Attributes$class('winner-announcement')
+								]),
+							_List_fromArray(
+								[
+									A2(
+									$elm$html$Html$h1,
+									_List_fromArray(
+										[
+											A2($elm$html$Html$Attributes$style, 'color', winnerColor),
+											A2($elm$html$Html$Attributes$style, 'margin', '0'),
+											A2($elm$html$Html$Attributes$style, 'font-size', '3em')
+										]),
+									_List_fromArray(
+										[
+											$elm$html$Html$text(winnerName + ' Wins!')
+										])),
+									A2(
+									$elm$html$Html$button,
+									_List_fromArray(
+										[
+											$elm$html$Html$Events$onClick($author$project$Game$Types$StartGame),
+											A2($elm$html$Html$Attributes$style, 'margin-top', '30px')
+										]),
+									_List_fromArray(
+										[
+											$elm$html$Html$text('Play Again')
+										]))
+								]))
+						]))
+				]));
+	});
 var $author$project$Main$viewLanding = A2(
 	$elm$html$Html$div,
 	_List_fromArray(
@@ -6364,10 +6528,14 @@ var $author$project$Main$view = function (model) {
 			[
 				function () {
 				var _v0 = model.gameState;
-				if (_v0.$ === 'Landing') {
-					return $author$project$Main$viewLanding;
-				} else {
-					return $author$project$Main$viewGame(model);
+				switch (_v0.$) {
+					case 'Landing':
+						return $author$project$Main$viewLanding;
+					case 'Playing':
+						return $author$project$Main$viewGame(model);
+					default:
+						var winner = _v0.a;
+						return A2($author$project$Main$viewGameOver, winner, model);
 				}
 			}()
 			]));

@@ -177,6 +177,9 @@ subscriptions model =
         
         Landing ->
             Sub.none
+        
+        GameOver _ ->
+            Sub.none
 
 
 -- VIEW
@@ -190,6 +193,9 @@ view model =
             
             Playing ->
                 viewGame model
+            
+            GameOver winner ->
+                viewGameOver winner model
         ]
 
 viewLanding : Html Msg
@@ -197,6 +203,35 @@ viewLanding =
     div [ class "landing" ]
         [ h1 [] [ text "Tomato Slingshot Battle" ]
         , button [ onClick StartGame ] [ text "Start New Game" ]
+        ]
+
+viewGameOver : Player -> Model -> Html Msg
+viewGameOver winner model =
+    let
+        (winnerName, winnerColor) = 
+            case winner of
+                PlayerA -> ("Player A", "#4CAF50")  -- Green
+                PlayerB -> ("Player B", "#f44336")  -- Red
+    in
+    div [ class "game" ]
+        [ viewGameInfo model
+        , viewGameArea model
+        , viewSlingshot model.currentPlayer model.slingshot
+        , div [ class "game-over-overlay" ]
+            [ div [ class "winner-announcement" ]
+                [ h1 
+                    [ style "color" winnerColor
+                    , style "margin" "0"
+                    , style "font-size" "3em"
+                    ] 
+                    [ text (winnerName ++ " Wins!") ]
+                , button 
+                    [ onClick StartGame
+                    , style "margin-top" "30px"
+                    ] 
+                    [ text "Play Again" ]
+                ]
+            ]
         ]
 
 viewGame : Model -> Html Msg

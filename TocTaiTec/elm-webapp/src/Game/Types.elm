@@ -6,6 +6,7 @@ import Time
 type GameState
     = Landing
     | Playing
+    | GameOver Player  -- Game ended with a winner
 
 
 type Player
