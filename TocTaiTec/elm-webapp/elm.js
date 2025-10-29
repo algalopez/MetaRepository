@@ -6085,9 +6085,14 @@ var $author$project$Main$update = F2(
 		switch (msg.$) {
 			case 'StartGame':
 				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{gameState: $author$project$Game$Types$Playing}),
+					{
+						currentPlayer: $author$project$Game$Types$PlayerA,
+						gameState: $author$project$Game$Types$Playing,
+						lastTime: 0,
+						projectiles: _List_Nil,
+						slingshot: {direction: $author$project$Game$Types$FacingRight, isLoading: false, strength: 0, x: 50},
+						targets: $author$project$Main$initTargets
+					},
 					$elm$core$Platform$Cmd$none);
 			case 'KeyPressed':
 				var key = msg.a;
@@ -6185,6 +6190,14 @@ var $elm$core$String$fromFloat = _String_fromNumber;
 var $elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
 var $elm$html$Html$Attributes$style = $elm$virtual_dom$VirtualDom$style;
 var $author$project$Main$viewProjectile = function (projectile) {
+	var tomatoColor = function () {
+		var _v0 = projectile.shotBy;
+		if (_v0.$ === 'PlayerA') {
+			return '#4CAF50';
+		} else {
+			return '#f44336';
+		}
+	}();
 	return A2(
 		$elm$html$Html$div,
 		_List_fromArray(
@@ -6198,7 +6211,8 @@ var $author$project$Main$viewProjectile = function (projectile) {
 				$elm$html$Html$Attributes$style,
 				'bottom',
 				$elm$core$String$fromFloat(projectile.y) + '%'),
-				A2($elm$html$Html$Attributes$style, 'transform', 'translate(-50%, 50%)')
+				A2($elm$html$Html$Attributes$style, 'transform', 'translate(-50%, 50%)'),
+				A2($elm$html$Html$Attributes$style, 'background-color', tomatoColor)
 			]),
 		_List_Nil);
 };

@@ -81,7 +81,21 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         StartGame ->
-            ( { model | gameState = Playing }, Cmd.none )
+            -- Reset the entire game to initial state
+            ( { gameState = Playing
+              , currentPlayer = PlayerA
+              , slingshot = 
+                    { x = 50
+                    , strength = 0
+                    , isLoading = False
+                    , direction = FacingRight
+                    }
+              , projectiles = []
+              , targets = initTargets
+              , lastTime = 0
+              }
+            , Cmd.none
+            )
 
         KeyPressed key ->
             case key of
@@ -305,11 +319,18 @@ viewTarget target =
 
 viewProjectile : Projectile -> Html Msg
 viewProjectile projectile =
+    let
+        tomatoColor = 
+            case projectile.shotBy of
+                PlayerA -> "#4CAF50"  -- Green for Player A
+                PlayerB -> "#f44336"  -- Red for Player B
+    in
     div
         [ class "tomato"
         , style "left" (String.fromFloat projectile.x ++ "%")
         , style "bottom" (String.fromFloat projectile.y ++ "%")
         , style "transform" "translate(-50%, 50%)"  -- Center the tomato on its position
+        , style "background-color" tomatoColor
         ]
         []
 
