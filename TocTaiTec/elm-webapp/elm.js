@@ -5831,7 +5831,14 @@ var $author$project$Game$Physics$shootTomato = function (model) {
 	var strength = model.slingshot.strength;
 	var targetHeight = strength;
 	var velocityY = 40 + (strength * 0.6);
-	var velocityX = velocityY * 0.05;
+	var velocityX = function () {
+		var _v2 = model.slingshot.direction;
+		if (_v2.$ === 'FacingRight') {
+			return velocityY * 0.05;
+		} else {
+			return velocityY * (-0.05);
+		}
+	}();
 	var nextPlayer = function () {
 		var _v1 = model.currentPlayer;
 		if (_v1.$ === 'PlayerA') {

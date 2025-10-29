@@ -56,13 +56,17 @@ shootTomato model =
         strength = model.slingshot.strength
         -- Use strength directly as target height percentage
         targetHeight = strength  -- strength is 0-100, perfect for percentage
-        -- Fixed upward velocity with 5% rightward angle
+        -- Fixed upward velocity with 5% angle
         velocityY = 40 + (strength * 0.6)  -- Fast upward movement
-        velocityX = velocityY * 0.05  -- 5% angle to the right
+        -- Angle direction depends on slingshot facing direction
+        velocityX = 
+            case model.slingshot.direction of
+                FacingRight -> velocityY * 0.05   -- 5% angle to the right
+                FacingLeft -> velocityY * -0.05   -- 5% angle to the left
         newProjectile =
             { x = model.slingshot.x
             , y = 0  -- Start at ground
-            , velocityX = velocityX  -- Rightward movement
+            , velocityX = velocityX  -- Movement based on slingshot direction
             , velocityY = velocityY
             , active = True
             , targetHeight = targetHeight  -- Store target height in projectile
