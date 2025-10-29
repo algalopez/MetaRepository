@@ -17,7 +17,13 @@ type alias Slingshot =
     { x : Float  -- position from 0 to 100 (percentage)
     , strength : Float  -- from 0 to 100
     , isLoading : Bool
+    , direction : SlingshotDirection  -- which way the slingshot is facing
     }
+
+
+type SlingshotDirection
+    = FacingRight
+    | FacingLeft
 
 
 type alias Projectile =

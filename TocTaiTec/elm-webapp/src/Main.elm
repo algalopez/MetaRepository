@@ -33,6 +33,7 @@ init _ =
             { x = 50  -- start in the middle
             , strength = 0  -- strength starts at 0
             , isLoading = False
+            , direction = FacingRight  -- default direction
             }
       , projectiles = []
       , targets = initTargets
@@ -139,7 +140,19 @@ update msg model =
 
 moveSlingshot : Slingshot -> Float -> Slingshot
 moveSlingshot slingshot delta =
-    { slingshot | x = clamp 0 100 (slingshot.x + delta) }
+    let
+        newDirection = 
+            if delta > 0 then
+                FacingRight
+            else if delta < 0 then
+                FacingLeft
+            else
+                slingshot.direction
+    in
+    { slingshot 
+        | x = clamp 0 100 (slingshot.x + delta)
+        , direction = newDirection
+    }
 
 startLoading : Slingshot -> Slingshot
 startLoading slingshot =
@@ -191,7 +204,7 @@ viewGame model =
     div [ class "game" ]
         [ viewGameInfo model
         , viewGameArea model
-        , viewSlingshot model.slingshot
+        , viewSlingshot model.currentPlayer model.slingshot
         ]
 
 viewGameInfo : Model -> Html Msg
@@ -265,8 +278,19 @@ viewProjectile projectile =
         ]
         []
 
-viewSlingshot : Slingshot -> Html Msg
-viewSlingshot slingshot =
+viewSlingshot : Player -> Slingshot -> Html Msg
+viewSlingshot currentPlayer slingshot =
+    let
+        -- Determine the image based on player and direction
+        imageFile = 
+            case (currentPlayer, slingshot.direction) of
+                (PlayerA, FacingRight) -> "slingshot_A1.png"
+                (PlayerA, FacingLeft) -> "slingshot_A2.png"
+                (PlayerB, FacingRight) -> "slingshot_B1.png"
+                (PlayerB, FacingLeft) -> "slingshot_B2.png"
+        
+        imagePath = "./public/images/" ++ imageFile
+    in
     div 
         [ class "slingshot"
         , style "left" (String.fromFloat slingshot.x ++ "%")
@@ -279,5 +303,5 @@ viewSlingshot slingshot =
                 ] 
                 []
             ]
-        , img [ src "./public/images/slingshot.png", alt "Slingshot" ] [] 
+        , img [ src imagePath, alt "Slingshot" ] [] 
         ]

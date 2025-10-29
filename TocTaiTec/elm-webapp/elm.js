@@ -5163,6 +5163,7 @@ var $elm$core$Task$perform = F2(
 				A2($elm$core$Task$map, toMessage, task)));
 	});
 var $elm$browser$Browser$element = _Browser_element;
+var $author$project$Game$Types$FacingRight = {$: 'FacingRight'};
 var $author$project$Game$Types$Landing = {$: 'Landing'};
 var $author$project$Game$Types$PlayerA = {$: 'PlayerA'};
 var $elm$core$Basics$negate = function (n) {
@@ -5221,7 +5222,7 @@ var $author$project$Main$init = function (_v0) {
 			gameState: $author$project$Game$Types$Landing,
 			lastTime: 0,
 			projectiles: _List_Nil,
-			slingshot: {isLoading: false, strength: 0, x: 50},
+			slingshot: {direction: $author$project$Game$Types$FacingRight, isLoading: false, strength: 0, x: 50},
 			targets: $author$project$Main$initTargets
 		},
 		$elm$core$Platform$Cmd$none);
@@ -5800,15 +5801,18 @@ var $elm$core$Basics$min = F2(
 	function (x, y) {
 		return (_Utils_cmp(x, y) < 0) ? x : y;
 	});
+var $author$project$Game$Types$FacingLeft = {$: 'FacingLeft'};
 var $elm$core$Basics$clamp = F3(
 	function (low, high, number) {
 		return (_Utils_cmp(number, low) < 0) ? low : ((_Utils_cmp(number, high) > 0) ? high : number);
 	});
 var $author$project$Main$moveSlingshot = F2(
 	function (slingshot, delta) {
+		var newDirection = (delta > 0) ? $author$project$Game$Types$FacingRight : ((delta < 0) ? $author$project$Game$Types$FacingLeft : slingshot.direction);
 		return _Utils_update(
 			slingshot,
 			{
+				direction: newDirection,
 				x: A3($elm$core$Basics$clamp, 0, 100, slingshot.x + delta)
 			});
 	});
@@ -6219,50 +6223,76 @@ var $author$project$Main$viewGameInfo = function (model) {
 					]))
 			]));
 };
-var $author$project$Main$viewSlingshot = function (slingshot) {
-	return A2(
-		$elm$html$Html$div,
-		_List_fromArray(
-			[
-				$elm$html$Html$Attributes$class('slingshot'),
-				A2(
-				$elm$html$Html$Attributes$style,
-				'left',
-				$elm$core$String$fromFloat(slingshot.x) + '%'),
-				A2($elm$html$Html$Attributes$style, 'bottom', '0')
-			]),
-		_List_fromArray(
-			[
-				A2(
-				$elm$html$Html$div,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$class('strength-bar')
-					]),
-				_List_fromArray(
-					[
-						A2(
-						$elm$html$Html$div,
-						_List_fromArray(
-							[
-								$elm$html$Html$Attributes$class('strength-bar-fill'),
-								A2(
-								$elm$html$Html$Attributes$style,
-								'height',
-								$elm$core$String$fromFloat(slingshot.strength) + '%')
-							]),
-						_List_Nil)
-					])),
-				A2(
-				$elm$html$Html$img,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$src('./public/images/slingshot.png'),
-						$elm$html$Html$Attributes$alt('Slingshot')
-					]),
-				_List_Nil)
-			]));
-};
+var $author$project$Main$viewSlingshot = F2(
+	function (currentPlayer, slingshot) {
+		var imageFile = function () {
+			var _v0 = _Utils_Tuple2(currentPlayer, slingshot.direction);
+			if (_v0.a.$ === 'PlayerA') {
+				if (_v0.b.$ === 'FacingRight') {
+					var _v1 = _v0.a;
+					var _v2 = _v0.b;
+					return 'slingshot_A1.png';
+				} else {
+					var _v3 = _v0.a;
+					var _v4 = _v0.b;
+					return 'slingshot_A2.png';
+				}
+			} else {
+				if (_v0.b.$ === 'FacingRight') {
+					var _v5 = _v0.a;
+					var _v6 = _v0.b;
+					return 'slingshot_B1.png';
+				} else {
+					var _v7 = _v0.a;
+					var _v8 = _v0.b;
+					return 'slingshot_B2.png';
+				}
+			}
+		}();
+		var imagePath = './public/images/' + imageFile;
+		return A2(
+			$elm$html$Html$div,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$class('slingshot'),
+					A2(
+					$elm$html$Html$Attributes$style,
+					'left',
+					$elm$core$String$fromFloat(slingshot.x) + '%'),
+					A2($elm$html$Html$Attributes$style, 'bottom', '0')
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$elm$html$Html$div,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class('strength-bar')
+						]),
+					_List_fromArray(
+						[
+							A2(
+							$elm$html$Html$div,
+							_List_fromArray(
+								[
+									$elm$html$Html$Attributes$class('strength-bar-fill'),
+									A2(
+									$elm$html$Html$Attributes$style,
+									'height',
+									$elm$core$String$fromFloat(slingshot.strength) + '%')
+								]),
+							_List_Nil)
+						])),
+					A2(
+					$elm$html$Html$img,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$src(imagePath),
+							$elm$html$Html$Attributes$alt('Slingshot')
+						]),
+					_List_Nil)
+				]));
+	});
 var $author$project$Main$viewGame = function (model) {
 	return A2(
 		$elm$html$Html$div,
@@ -6274,7 +6304,7 @@ var $author$project$Main$viewGame = function (model) {
 			[
 				$author$project$Main$viewGameInfo(model),
 				$author$project$Main$viewGameArea(model),
-				$author$project$Main$viewSlingshot(model.slingshot)
+				A2($author$project$Main$viewSlingshot, model.currentPlayer, model.slingshot)
 			]));
 };
 var $author$project$Game$Types$StartGame = {$: 'StartGame'};
