@@ -5826,32 +5826,27 @@ var $author$project$Main$releaseSlingshot = function (slingshot) {
 		{isLoading: false});
 };
 var $author$project$Game$Types$PlayerB = {$: 'PlayerB'};
-var $elm$core$Debug$log = _Debug_log;
 var $author$project$Game$Physics$shootTomato = function (model) {
 	var strength = model.slingshot.strength;
 	var targetHeight = strength;
 	var velocityY = 40 + (strength * 0.6);
 	var velocityX = function () {
-		var _v2 = model.slingshot.direction;
-		if (_v2.$ === 'FacingRight') {
+		var _v1 = model.slingshot.direction;
+		if (_v1.$ === 'FacingRight') {
 			return velocityY * 0.05;
 		} else {
 			return velocityY * (-0.05);
 		}
 	}();
 	var nextPlayer = function () {
-		var _v1 = model.currentPlayer;
-		if (_v1.$ === 'PlayerA') {
+		var _v0 = model.currentPlayer;
+		if (_v0.$ === 'PlayerA') {
 			return $author$project$Game$Types$PlayerB;
 		} else {
 			return $author$project$Game$Types$PlayerA;
 		}
 	}();
 	var newProjectile = {active: true, lifetime: 0, shotBy: model.currentPlayer, targetHeight: targetHeight, velocityX: velocityX, velocityY: velocityY, x: model.slingshot.x, y: 0};
-	var _v0 = A2(
-		$elm$core$Debug$log,
-		'Shot',
-		{strength: model.slingshot.strength, x: model.slingshot.x});
 	return _Utils_Tuple2(
 		_Utils_update(
 			model,
@@ -5976,6 +5971,7 @@ var $elm$core$List$head = function (list) {
 		return $elm$core$Maybe$Nothing;
 	}
 };
+var $elm$core$Debug$log = _Debug_log;
 var $elm$time$Time$posixToMillis = function (_v0) {
 	var millis = _v0.a;
 	return millis;
@@ -6010,32 +6006,34 @@ var $author$project$Game$Physics$updateProjectiles = F2(
 		var updateTargetPosition = function (target) {
 			var newY = target.y + (target.velocityY * deltaTime);
 			var newX = target.x + (target.velocityX * deltaTime);
-			var _v2 = (newY <= 0) ? _Utils_Tuple2(
+			var _v5 = (newY <= 0) ? _Utils_Tuple2(
 				0,
 				$elm$core$Basics$abs(target.velocityY)) : ((newY >= 100) ? _Utils_Tuple2(
 				100,
 				-$elm$core$Basics$abs(target.velocityY)) : _Utils_Tuple2(newY, target.velocityY));
-			var finalY = _v2.a;
-			var finalVelY = _v2.b;
-			var _v3 = (newX <= 0) ? _Utils_Tuple2(
+			var finalY = _v5.a;
+			var finalVelY = _v5.b;
+			var _v6 = (newX <= 0) ? _Utils_Tuple2(
 				0,
 				$elm$core$Basics$abs(target.velocityX)) : ((newX >= 100) ? _Utils_Tuple2(
 				100,
 				-$elm$core$Basics$abs(target.velocityX)) : _Utils_Tuple2(newX, target.velocityX));
-			var finalX = _v3.a;
-			var finalVelX = _v3.b;
+			var finalX = _v6.a;
+			var finalVelX = _v6.b;
 			return _Utils_update(
 				target,
 				{velocityX: finalVelX, velocityY: finalVelY, x: finalX, y: finalY});
 		};
 		var checkHit = F2(
 			function (proj, target) {
+				var wasFlying = (proj.lifetime - deltaTime) < 1.5;
 				var notAlreadyHit = _Utils_eq(target.hitBy, $elm$core$Maybe$Nothing);
-				var justStopped = (proj.lifetime >= 1.5) && (_Utils_cmp(proj.lifetime, 1.5 + deltaTime) < 0);
+				var isStopped = proj.lifetime >= 1.5;
+				var justStopped = wasFlying && isStopped;
 				var halfSize = target.size / 2;
 				var distanceY = $elm$core$Basics$abs(proj.y - target.y);
 				var distanceX = $elm$core$Basics$abs(proj.x - target.x);
-				var isOverlapping = (_Utils_cmp(distanceX, halfSize) < 0) && (_Utils_cmp(distanceY, halfSize) < 0);
+				var isOverlapping = (_Utils_cmp(distanceX, halfSize) < 1) && (_Utils_cmp(distanceY, halfSize) < 1);
 				return justStopped && (isOverlapping && notAlreadyHit);
 			});
 		var updateTargetWithHits = function (target) {
@@ -6071,6 +6069,53 @@ var $author$project$Game$Physics$updateProjectiles = F2(
 				return model.gameState;
 			}
 		}();
+		var _v0 = A2(
+			$elm$core$List$map,
+			function (proj) {
+				var square1 = $elm$core$List$head(
+					A2(
+						$elm$core$List$filter,
+						function (t) {
+							return !t.id;
+						},
+						model.targets));
+				var _v1 = function () {
+					if (square1.$ === 'Just') {
+						var sq = square1.a;
+						return A2(
+							$elm$core$Debug$log,
+							'TOMATO vs SQUARE 1',
+							{
+								square1: {
+									bounds: {bottom: sq.y - (sq.size / 2), left: sq.x - (sq.size / 2), right: sq.x + (sq.size / 2), top: sq.y + (sq.size / 2)},
+									size: sq.size,
+									x: sq.x,
+									y: sq.y
+								},
+								tomato: {x: proj.x, y: proj.y}
+							});
+					} else {
+						return {
+							square1: {
+								bounds: {bottom: 0, left: 0, right: 0, top: 0},
+								size: 0,
+								x: 0,
+								y: 0
+							},
+							tomato: {x: 0, y: 0}
+						};
+					}
+				}();
+				return proj;
+			},
+			A2(
+				$elm$core$List$filter,
+				function (proj) {
+					var wasFlying = (proj.lifetime - deltaTime) < 1.5;
+					var isStopped = proj.lifetime >= 1.5;
+					return wasFlying && isStopped;
+				},
+				updatedProjectiles));
 		return _Utils_Tuple2(
 			_Utils_update(
 				model,
@@ -6218,7 +6263,7 @@ var $author$project$Main$viewProjectile = function (projectile) {
 				$elm$html$Html$Attributes$style,
 				'bottom',
 				$elm$core$String$fromFloat(projectile.y) + '%'),
-				A2($elm$html$Html$Attributes$style, 'transform', 'translate(-50%, 50%)'),
+				A2($elm$html$Html$Attributes$style, 'transform', 'translate(-50%, -50%)'),
 				A2($elm$html$Html$Attributes$style, 'background-color', tomatoColor)
 			]),
 		_List_Nil);

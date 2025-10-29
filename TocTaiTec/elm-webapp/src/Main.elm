@@ -329,7 +329,7 @@ viewProjectile projectile =
         [ class "tomato"
         , style "left" (String.fromFloat projectile.x ++ "%")
         , style "bottom" (String.fromFloat projectile.y ++ "%")
-        , style "transform" "translate(-50%, 50%)"  -- Center the tomato on its position
+        , style "transform" "translate(-50%, -50%)"  -- Center the tomato on its position (same as targets)
         , style "background-color" tomatoColor
         ]
         []

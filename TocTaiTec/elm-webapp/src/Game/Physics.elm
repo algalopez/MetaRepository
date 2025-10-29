@@ -52,7 +52,7 @@ checkWinner targets =
 shootTomato : Model -> ( Model, Cmd Msg )
 shootTomato model =
     let
-        _ = Debug.log "Shot" { strength = model.slingshot.strength, x = model.slingshot.x }
+        -- _ = Debug.log "Shot" { strength = model.slingshot.strength, x = model.slingshot.x }
         strength = model.slingshot.strength
         -- Use strength directly as target height percentage
         targetHeight = strength  -- strength is 0-100, perfect for percentage
@@ -172,15 +172,22 @@ updateProjectiles newTime model =
         checkHit proj target =
             let
                 -- Check if projectile just stopped (at 1.5 seconds)
-                justStopped = proj.lifetime >= 1.5 && proj.lifetime < 1.5 + deltaTime
+                -- We need to check if it crossed the 1.5 second threshold this frame
+                wasFlying = (proj.lifetime - deltaTime) < 1.5
+                isStopped = proj.lifetime >= 1.5
+                justStopped = wasFlying && isStopped
                 
-                -- Check if projectile position overlaps with target
-                -- Using half of target size for collision detection
+                -- Check if projectile position overlaps with target square
+                -- The target is a square with size%, centered at (target.x, target.y)
+                -- The projectile is a point at (proj.x, proj.y)
                 halfSize = target.size / 2
+                
+                -- Calculate absolute distances
                 distanceX = abs (proj.x - target.x)
                 distanceY = abs (proj.y - target.y)
                 
-                isOverlapping = distanceX < halfSize && distanceY < halfSize
+                -- The projectile hits if it's within the target's bounds
+                isOverlapping = distanceX <= halfSize && distanceY <= halfSize
                 
                 -- Target must not be already hit
                 notAlreadyHit = target.hitBy == Nothing
@@ -189,6 +196,51 @@ updateProjectiles newTime model =
         
         -- Update targets and check for hits
         updatedProjectiles = List.map updateProjectile model.projectiles
+        
+        -- Log when any projectile stops
+        _ = 
+            updatedProjectiles
+                |> List.filter (\proj -> 
+                    let
+                        wasFlying = (proj.lifetime - deltaTime) < 1.5
+                        isStopped = proj.lifetime >= 1.5
+                    in
+                    wasFlying && isStopped
+                )
+                |> List.map (\proj -> 
+                    let
+                        -- Find square 1 (id = 0)
+                        square1 = 
+                            model.targets
+                                |> List.filter (\t -> t.id == 0)
+                                |> List.head
+                        
+                        _ = case square1 of
+                            Just sq ->
+                                Debug.log "TOMATO vs SQUARE 1" 
+                                    { tomato = 
+                                        { x = proj.x
+                                        , y = proj.y
+                                        }
+                                    , square1 = 
+                                        { x = sq.x
+                                        , y = sq.y
+                                        , size = sq.size
+                                        , bounds = 
+                                            { left = sq.x - (sq.size / 2)
+                                            , right = sq.x + (sq.size / 2)
+                                            , bottom = sq.y - (sq.size / 2)
+                                            , top = sq.y + (sq.size / 2)
+                                            }
+                                        }
+                                    }
+                            Nothing ->
+                                { tomato = { x = 0, y = 0 }
+                                , square1 = { x = 0, y = 0, size = 0, bounds = { left = 0, right = 0, bottom = 0, top = 0 } }
+                                }
+                    in
+                    proj
+                )
         
         -- For each target, check if any projectile hit it
         updateTargetWithHits : Target -> Target
