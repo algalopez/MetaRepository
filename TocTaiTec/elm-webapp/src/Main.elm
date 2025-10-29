@@ -35,10 +35,43 @@ init _ =
             , isLoading = False
             }
       , projectiles = []
+      , targets = initTargets
       , lastTime = 0
       }
     , Cmd.none
     )
+
+
+-- Initialize 9 targets in a 3x3 grid formation
+initTargets : List Target
+initTargets =
+    let
+        -- Grid positions for 3x3 formation in the middle of the screen
+        positions = 
+            [ (30, 40), (45, 40), (60, 40)  -- Bottom row
+            , (30, 55), (45, 55), (60, 55)  -- Middle row
+            , (30, 70), (45, 70), (60, 70)  -- Top row
+            ]
+        
+        -- Different velocity patterns for each target (slower speeds)
+        velocities =
+            [ (8, 5), (-6, 8), (9, -4)
+            , (-5, -6), (7, 7), (-8, 5)
+            , (6, -7), (-8, -5), (5, 8)
+            ]
+        
+        createTarget : Int -> ((Float, Float), (Float, Float)) -> Target
+        createTarget id ((x, y), (vx, vy)) =
+            { id = id
+            , x = x
+            , y = y
+            , velocityX = vx
+            , velocityY = vy
+            , size = 12  -- 12% of screen size (bigger)
+            , hitBy = Nothing  -- Not hit by anyone initially
+            }
+    in
+    List.indexedMap createTarget (List.map2 Tuple.pair positions velocities)
 
 
 -- UPDATE
@@ -163,17 +196,54 @@ viewGame model =
 
 viewGameInfo : Model -> Html Msg
 viewGameInfo model =
-    div [ class "game-info" ]
-        [ text <| "Current Turn: " ++
+    let
+        (playerName, playerColor) = 
             case model.currentPlayer of
-                PlayerA -> "Player A"
-                PlayerB -> "Player B"
+                PlayerA -> ("Player A", "#4CAF50")  -- Green
+                PlayerB -> ("Player B", "#f44336")  -- Red
+    in
+    div [ class "game-info" ]
+        [ div [] 
+            [ text "Current Turn: "
+            , span 
+                [ style "color" playerColor
+                , style "font-weight" "bold"
+                ] 
+                [ text playerName ]
+            ]
         ]
 
 viewGameArea : Model -> Html Msg
 viewGameArea model =
     div [ class "game-area" ]
-        (List.map viewProjectile model.projectiles)
+        (List.map viewTarget model.targets 
+        ++ List.map viewProjectile model.projectiles)
+
+viewTarget : Target -> Html Msg
+viewTarget target =
+    let
+        (backgroundColor, borderColor) = 
+            case target.hitBy of
+                Just PlayerA ->
+                    ("#4CAF50", "#388E3C")  -- Green for Player A
+                
+                Just PlayerB ->
+                    ("#f44336", "#c62828")  -- Red for Player B
+                
+                Nothing ->
+                    ("#ff9800", "#f57c00")  -- Orange for not hit
+    in
+    div
+        [ class "target"
+        , style "left" (String.fromFloat target.x ++ "%")
+        , style "bottom" (String.fromFloat target.y ++ "%")
+        , style "width" (String.fromFloat target.size ++ "%")
+        , style "height" (String.fromFloat target.size ++ "%")
+        , style "transform" "translate(-50%, -50%)"
+        , style "background-color" backgroundColor
+        , style "border-color" borderColor
+        ]
+        [ text (String.fromInt (target.id + 1)) ]
 
 viewProjectile : Projectile -> Html Msg
 viewProjectile projectile =

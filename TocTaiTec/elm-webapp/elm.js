@@ -5165,6 +5165,53 @@ var $elm$core$Task$perform = F2(
 var $elm$browser$Browser$element = _Browser_element;
 var $author$project$Game$Types$Landing = {$: 'Landing'};
 var $author$project$Game$Types$PlayerA = {$: 'PlayerA'};
+var $elm$core$Basics$negate = function (n) {
+	return -n;
+};
+var $elm$core$Tuple$pair = F2(
+	function (a, b) {
+		return _Utils_Tuple2(a, b);
+	});
+var $author$project$Main$initTargets = function () {
+	var velocities = _List_fromArray(
+		[
+			_Utils_Tuple2(8, 5),
+			_Utils_Tuple2(-6, 8),
+			_Utils_Tuple2(9, -4),
+			_Utils_Tuple2(-5, -6),
+			_Utils_Tuple2(7, 7),
+			_Utils_Tuple2(-8, 5),
+			_Utils_Tuple2(6, -7),
+			_Utils_Tuple2(-8, -5),
+			_Utils_Tuple2(5, 8)
+		]);
+	var positions = _List_fromArray(
+		[
+			_Utils_Tuple2(30, 40),
+			_Utils_Tuple2(45, 40),
+			_Utils_Tuple2(60, 40),
+			_Utils_Tuple2(30, 55),
+			_Utils_Tuple2(45, 55),
+			_Utils_Tuple2(60, 55),
+			_Utils_Tuple2(30, 70),
+			_Utils_Tuple2(45, 70),
+			_Utils_Tuple2(60, 70)
+		]);
+	var createTarget = F2(
+		function (id, _v0) {
+			var _v1 = _v0.a;
+			var x = _v1.a;
+			var y = _v1.b;
+			var _v2 = _v0.b;
+			var vx = _v2.a;
+			var vy = _v2.b;
+			return {hitBy: $elm$core$Maybe$Nothing, id: id, size: 12, velocityX: vx, velocityY: vy, x: x, y: y};
+		});
+	return A2(
+		$elm$core$List$indexedMap,
+		createTarget,
+		A3($elm$core$List$map2, $elm$core$Tuple$pair, positions, velocities));
+}();
 var $elm$core$Platform$Cmd$batch = _Platform_batch;
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
 var $author$project$Main$init = function (_v0) {
@@ -5174,7 +5221,8 @@ var $author$project$Main$init = function (_v0) {
 			gameState: $author$project$Game$Types$Landing,
 			lastTime: 0,
 			projectiles: _List_Nil,
-			slingshot: {isLoading: false, strength: 0, x: 50}
+			slingshot: {isLoading: false, strength: 0, x: 50},
+			targets: $author$project$Main$initTargets
 		},
 		$elm$core$Platform$Cmd$none);
 };
@@ -5764,9 +5812,6 @@ var $author$project$Main$moveSlingshot = F2(
 				x: A3($elm$core$Basics$clamp, 0, 100, slingshot.x + delta)
 			});
 	});
-var $elm$core$Basics$negate = function (n) {
-	return -n;
-};
 var $elm$core$Basics$not = _Basics_not;
 var $author$project$Main$releaseSlingshot = function (slingshot) {
 	return _Utils_update(
@@ -5779,7 +5824,16 @@ var $author$project$Game$Physics$shootTomato = function (model) {
 	var strength = model.slingshot.strength;
 	var targetHeight = strength;
 	var velocityY = 40 + (strength * 0.6);
-	var newProjectile = {active: true, lifetime: 0, targetHeight: targetHeight, velocityX: 0, velocityY: velocityY, x: model.slingshot.x, y: 0};
+	var velocityX = velocityY * 0.05;
+	var nextPlayer = function () {
+		var _v1 = model.currentPlayer;
+		if (_v1.$ === 'PlayerA') {
+			return $author$project$Game$Types$PlayerB;
+		} else {
+			return $author$project$Game$Types$PlayerA;
+		}
+	}();
+	var newProjectile = {active: true, lifetime: 0, shotBy: model.currentPlayer, targetHeight: targetHeight, velocityX: velocityX, velocityY: velocityY, x: model.slingshot.x, y: 0};
 	var _v0 = A2(
 		$elm$core$Debug$log,
 		'Shot',
@@ -5788,14 +5842,7 @@ var $author$project$Game$Physics$shootTomato = function (model) {
 		_Utils_update(
 			model,
 			{
-				currentPlayer: function () {
-					var _v1 = model.currentPlayer;
-					if (_v1.$ === 'PlayerA') {
-						return $author$project$Game$Types$PlayerB;
-					} else {
-						return $author$project$Game$Types$PlayerA;
-					}
-				}(),
+				currentPlayer: nextPlayer,
 				projectiles: A2($elm$core$List$cons, newProjectile, model.projectiles)
 			}),
 		$elm$core$Platform$Cmd$none);
@@ -5804,6 +5851,9 @@ var $author$project$Main$startLoading = function (slingshot) {
 	return _Utils_update(
 		slingshot,
 		{isLoading: true});
+};
+var $elm$core$Basics$abs = function (n) {
+	return (n < 0) ? (-n) : n;
 };
 var $elm$core$List$filter = F2(
 	function (isGood, list) {
@@ -5817,6 +5867,15 @@ var $elm$core$List$filter = F2(
 			list);
 	});
 var $elm$core$Basics$ge = _Utils_ge;
+var $elm$core$List$head = function (list) {
+	if (list.b) {
+		var x = list.a;
+		var xs = list.b;
+		return $elm$core$Maybe$Just(x);
+	} else {
+		return $elm$core$Maybe$Nothing;
+	}
+};
 var $elm$time$Time$posixToMillis = function (_v0) {
 	var millis = _v0.a;
 	return millis;
@@ -5830,23 +5889,79 @@ var $author$project$Game$Physics$updateProjectiles = F2(
 			if (!proj.active) {
 				return proj;
 			} else {
-				var newVelocityY = (_Utils_cmp(proj.y, proj.targetHeight) < 0) ? (proj.velocityY + (gravity * deltaTime)) : 0;
-				var newY = (_Utils_cmp(proj.y, proj.targetHeight) < 0) ? A2($elm$core$Basics$min, proj.targetHeight, proj.y + (newVelocityY * deltaTime)) : proj.targetHeight;
 				var newLifetime = proj.lifetime + deltaTime;
-				var shouldDisappear = newLifetime > 2.0;
-				var _v0 = A2(
-					$elm$core$Debug$log,
-					'Gravity',
-					{newVelocity: newVelocityY, newY: newY});
+				var shouldDisappear = newLifetime > 2.5;
+				var isFlying = newLifetime < 1.5;
+				var newVelocityY = (isFlying && (_Utils_cmp(proj.y, proj.targetHeight) < 0)) ? (proj.velocityY + (gravity * deltaTime)) : 0;
+				var newX = isFlying ? (proj.x + (proj.velocityX * deltaTime)) : proj.x;
+				var newY = (isFlying && (_Utils_cmp(proj.y, proj.targetHeight) < 0)) ? A2($elm$core$Basics$min, proj.targetHeight, proj.y + (newVelocityY * deltaTime)) : proj.y;
 				return shouldDisappear ? _Utils_update(
 					proj,
-					{active: false}) : ((_Utils_cmp(newY, proj.targetHeight) > -1) ? _Utils_update(
+					{active: false}) : ((!isFlying) ? _Utils_update(
 					proj,
-					{lifetime: newLifetime, velocityY: 0, y: proj.targetHeight}) : _Utils_update(
+					{lifetime: newLifetime, velocityX: 0, velocityY: 0, x: newX, y: newY}) : ((_Utils_cmp(newY, proj.targetHeight) > -1) ? _Utils_update(
 					proj,
-					{lifetime: newLifetime, velocityY: newVelocityY, y: newY}));
+					{lifetime: newLifetime, velocityX: proj.velocityX, velocityY: 0, x: newX, y: proj.targetHeight}) : _Utils_update(
+					proj,
+					{lifetime: newLifetime, velocityX: proj.velocityX, velocityY: newVelocityY, x: newX, y: newY})));
 			}
 		};
+		var updatedProjectiles = A2($elm$core$List$map, updateProjectile, model.projectiles);
+		var updateTargetPosition = function (target) {
+			var newY = target.y + (target.velocityY * deltaTime);
+			var newX = target.x + (target.velocityX * deltaTime);
+			var _v1 = (newY <= 0) ? _Utils_Tuple2(
+				0,
+				$elm$core$Basics$abs(target.velocityY)) : ((newY >= 100) ? _Utils_Tuple2(
+				100,
+				-$elm$core$Basics$abs(target.velocityY)) : _Utils_Tuple2(newY, target.velocityY));
+			var finalY = _v1.a;
+			var finalVelY = _v1.b;
+			var _v2 = (newX <= 0) ? _Utils_Tuple2(
+				0,
+				$elm$core$Basics$abs(target.velocityX)) : ((newX >= 100) ? _Utils_Tuple2(
+				100,
+				-$elm$core$Basics$abs(target.velocityX)) : _Utils_Tuple2(newX, target.velocityX));
+			var finalX = _v2.a;
+			var finalVelX = _v2.b;
+			return _Utils_update(
+				target,
+				{velocityX: finalVelX, velocityY: finalVelY, x: finalX, y: finalY});
+		};
+		var checkHit = F2(
+			function (proj, target) {
+				var notAlreadyHit = _Utils_eq(target.hitBy, $elm$core$Maybe$Nothing);
+				var justStopped = (proj.lifetime >= 1.5) && (_Utils_cmp(proj.lifetime, 1.5 + deltaTime) < 0);
+				var halfSize = target.size / 2;
+				var distanceY = $elm$core$Basics$abs(proj.y - target.y);
+				var distanceX = $elm$core$Basics$abs(proj.x - target.x);
+				var isOverlapping = (_Utils_cmp(distanceX, halfSize) < 0) && (_Utils_cmp(distanceY, halfSize) < 0);
+				return justStopped && (isOverlapping && notAlreadyHit);
+			});
+		var updateTargetWithHits = function (target) {
+			var hitByProjectile = $elm$core$List$head(
+				A2(
+					$elm$core$List$filter,
+					function (proj) {
+						return A2(checkHit, proj, target);
+					},
+					updatedProjectiles));
+			var newHitBy = function () {
+				if (hitByProjectile.$ === 'Just') {
+					var proj = hitByProjectile.a;
+					return $elm$core$Maybe$Just(proj.shotBy);
+				} else {
+					return target.hitBy;
+				}
+			}();
+			return _Utils_update(
+				target,
+				{hitBy: newHitBy});
+		};
+		var updatedTargets = A2(
+			$elm$core$List$map,
+			updateTargetPosition,
+			A2($elm$core$List$map, updateTargetWithHits, model.targets));
 		return _Utils_Tuple2(
 			_Utils_update(
 				model,
@@ -5857,7 +5972,8 @@ var $author$project$Game$Physics$updateProjectiles = F2(
 						function ($) {
 							return $.active;
 						},
-						A2($elm$core$List$map, updateProjectile, model.projectiles))
+						updatedProjectiles),
+					targets: updatedTargets
 				}),
 			$elm$core$Platform$Cmd$none);
 	});
@@ -5983,6 +6099,56 @@ var $author$project$Main$viewProjectile = function (projectile) {
 			]),
 		_List_Nil);
 };
+var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
+var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
+var $author$project$Main$viewTarget = function (target) {
+	var _v0 = function () {
+		var _v1 = target.hitBy;
+		if (_v1.$ === 'Just') {
+			if (_v1.a.$ === 'PlayerA') {
+				var _v2 = _v1.a;
+				return _Utils_Tuple2('#4CAF50', '#388E3C');
+			} else {
+				var _v3 = _v1.a;
+				return _Utils_Tuple2('#f44336', '#c62828');
+			}
+		} else {
+			return _Utils_Tuple2('#ff9800', '#f57c00');
+		}
+	}();
+	var backgroundColor = _v0.a;
+	var borderColor = _v0.b;
+	return A2(
+		$elm$html$Html$div,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$class('target'),
+				A2(
+				$elm$html$Html$Attributes$style,
+				'left',
+				$elm$core$String$fromFloat(target.x) + '%'),
+				A2(
+				$elm$html$Html$Attributes$style,
+				'bottom',
+				$elm$core$String$fromFloat(target.y) + '%'),
+				A2(
+				$elm$html$Html$Attributes$style,
+				'width',
+				$elm$core$String$fromFloat(target.size) + '%'),
+				A2(
+				$elm$html$Html$Attributes$style,
+				'height',
+				$elm$core$String$fromFloat(target.size) + '%'),
+				A2($elm$html$Html$Attributes$style, 'transform', 'translate(-50%, -50%)'),
+				A2($elm$html$Html$Attributes$style, 'background-color', backgroundColor),
+				A2($elm$html$Html$Attributes$style, 'border-color', borderColor)
+			]),
+		_List_fromArray(
+			[
+				$elm$html$Html$text(
+				$elm$core$String$fromInt(target.id + 1))
+			]));
+};
 var $author$project$Main$viewGameArea = function (model) {
 	return A2(
 		$elm$html$Html$div,
@@ -5990,11 +6156,22 @@ var $author$project$Main$viewGameArea = function (model) {
 			[
 				$elm$html$Html$Attributes$class('game-area')
 			]),
-		A2($elm$core$List$map, $author$project$Main$viewProjectile, model.projectiles));
+		_Utils_ap(
+			A2($elm$core$List$map, $author$project$Main$viewTarget, model.targets),
+			A2($elm$core$List$map, $author$project$Main$viewProjectile, model.projectiles)));
 };
-var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
-var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
+var $elm$html$Html$span = _VirtualDom_node('span');
 var $author$project$Main$viewGameInfo = function (model) {
+	var _v0 = function () {
+		var _v1 = model.currentPlayer;
+		if (_v1.$ === 'PlayerA') {
+			return _Utils_Tuple2('Player A', '#4CAF50');
+		} else {
+			return _Utils_Tuple2('Player B', '#f44336');
+		}
+	}();
+	var playerName = _v0.a;
+	var playerColor = _v0.b;
 	return A2(
 		$elm$html$Html$div,
 		_List_fromArray(
@@ -6003,15 +6180,24 @@ var $author$project$Main$viewGameInfo = function (model) {
 			]),
 		_List_fromArray(
 			[
-				$elm$html$Html$text(
-				'Current Turn: ' + function () {
-					var _v0 = model.currentPlayer;
-					if (_v0.$ === 'PlayerA') {
-						return 'Player A';
-					} else {
-						return 'Player B';
-					}
-				}())
+				A2(
+				$elm$html$Html$div,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$elm$html$Html$text('Current Turn: '),
+						A2(
+						$elm$html$Html$span,
+						_List_fromArray(
+							[
+								A2($elm$html$Html$Attributes$style, 'color', playerColor),
+								A2($elm$html$Html$Attributes$style, 'font-weight', 'bold')
+							]),
+						_List_fromArray(
+							[
+								$elm$html$Html$text(playerName)
+							]))
+					]))
 			]));
 };
 var $elm$html$Html$Attributes$alt = $elm$html$Html$Attributes$stringProperty('alt');

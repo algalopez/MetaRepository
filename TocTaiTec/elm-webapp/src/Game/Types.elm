@@ -28,6 +28,18 @@ type alias Projectile =
     , active : Bool
     , targetHeight : Float  -- Target height percentage (0-100)
     , lifetime : Float  -- Time in seconds the projectile has existed
+    , shotBy : Player  -- which player shot this projectile
+    }
+
+
+type alias Target =
+    { id : Int
+    , x : Float  -- position from 0 to 100 (percentage)
+    , y : Float  -- position from 0 to 100 (percentage)
+    , velocityX : Float  -- pixels per second
+    , velocityY : Float  -- pixels per second
+    , size : Float  -- size in percentage
+    , hitBy : Maybe Player  -- which player hit this target (Nothing if not hit)
     }
 
 
@@ -36,6 +48,7 @@ type alias Model =
     , currentPlayer : Player
     , slingshot : Slingshot
     , projectiles : List Projectile
+    , targets : List Target
     , lastTime : Int  -- Store time in milliseconds
     }
 
