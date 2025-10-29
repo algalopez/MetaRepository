@@ -232,6 +232,8 @@ viewTarget target =
                 
                 Nothing ->
                     ("#ff9800", "#f57c00")  -- Orange for not hit
+        
+        imagePath = "./public/images/tictactoe_" ++ String.fromInt (target.id + 1) ++ ".png"
     in
     div
         [ class "target"
@@ -243,7 +245,15 @@ viewTarget target =
         , style "background-color" backgroundColor
         , style "border-color" borderColor
         ]
-        [ text (String.fromInt (target.id + 1)) ]
+        [ img 
+            [ src imagePath
+            , alt ("Target " ++ String.fromInt (target.id + 1))
+            , style "width" "100%"
+            , style "height" "100%"
+            , style "object-fit" "contain"
+            ] 
+            []
+        ]
 
 viewProjectile : Projectile -> Html Msg
 viewProjectile projectile =

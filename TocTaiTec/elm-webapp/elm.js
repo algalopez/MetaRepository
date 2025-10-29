@@ -6099,9 +6099,16 @@ var $author$project$Main$viewProjectile = function (projectile) {
 			]),
 		_List_Nil);
 };
-var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
-var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
+var $elm$html$Html$Attributes$alt = $elm$html$Html$Attributes$stringProperty('alt');
+var $elm$html$Html$img = _VirtualDom_node('img');
+var $elm$html$Html$Attributes$src = function (url) {
+	return A2(
+		$elm$html$Html$Attributes$stringProperty,
+		'src',
+		_VirtualDom_noJavaScriptOrHtmlUri(url));
+};
 var $author$project$Main$viewTarget = function (target) {
+	var imagePath = './public/images/tictactoe_' + ($elm$core$String$fromInt(target.id + 1) + '.png');
 	var _v0 = function () {
 		var _v1 = target.hitBy;
 		if (_v1.$ === 'Just') {
@@ -6145,8 +6152,18 @@ var $author$project$Main$viewTarget = function (target) {
 			]),
 		_List_fromArray(
 			[
-				$elm$html$Html$text(
-				$elm$core$String$fromInt(target.id + 1))
+				A2(
+				$elm$html$Html$img,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$src(imagePath),
+						$elm$html$Html$Attributes$alt(
+						'Target ' + $elm$core$String$fromInt(target.id + 1)),
+						A2($elm$html$Html$Attributes$style, 'width', '100%'),
+						A2($elm$html$Html$Attributes$style, 'height', '100%'),
+						A2($elm$html$Html$Attributes$style, 'object-fit', 'contain')
+					]),
+				_List_Nil)
 			]));
 };
 var $author$project$Main$viewGameArea = function (model) {
@@ -6161,6 +6178,8 @@ var $author$project$Main$viewGameArea = function (model) {
 			A2($elm$core$List$map, $author$project$Main$viewProjectile, model.projectiles)));
 };
 var $elm$html$Html$span = _VirtualDom_node('span');
+var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
+var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
 var $author$project$Main$viewGameInfo = function (model) {
 	var _v0 = function () {
 		var _v1 = model.currentPlayer;
@@ -6199,14 +6218,6 @@ var $author$project$Main$viewGameInfo = function (model) {
 							]))
 					]))
 			]));
-};
-var $elm$html$Html$Attributes$alt = $elm$html$Html$Attributes$stringProperty('alt');
-var $elm$html$Html$img = _VirtualDom_node('img');
-var $elm$html$Html$Attributes$src = function (url) {
-	return A2(
-		$elm$html$Html$Attributes$stringProperty,
-		'src',
-		_VirtualDom_noJavaScriptOrHtmlUri(url));
 };
 var $author$project$Main$viewSlingshot = function (slingshot) {
 	return A2(
