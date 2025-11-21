@@ -49,9 +49,9 @@ initTargets =
     let
         -- Grid positions for 3x3 formation in the middle of the screen
         positions = 
-            [ (30, 40), (45, 40), (60, 40)  -- Bottom row
-            , (30, 55), (45, 55), (60, 55)  -- Middle row
-            , (30, 70), (45, 70), (60, 70)  -- Top row
+            [ (35, 65), (50, 65), (65, 65)  -- Top row
+            , (35, 50), (50, 50), (65, 50)  -- Middle row
+            , (35, 35), (50, 35), (65, 35)  -- Bottom row
             ]
         
         -- Different velocity patterns for each target (slower speeds)
@@ -60,6 +60,11 @@ initTargets =
             , (-5, -6), (7, 7), (-8, 5)
             , (6, -7), (-8, -5), (5, 8)
             ]
+        -- velocities =
+        --     [ (0, 0), (0, 0), (0, 0)
+        --     , (0, 0), (0, 0), (0, 0)
+        --     , (0, 0), (0, 0), (0, 0)
+        --     ]
         
         createTarget : Int -> ((Float, Float), (Float, Float)) -> Target
         createTarget id ((x, y), (vx, vy)) =
@@ -68,7 +73,7 @@ initTargets =
             , y = y
             , velocityX = vx
             , velocityY = vy
-            , size = 12  -- 12% of screen size (bigger)
+            , size = 100  -- 100 pixels (fixed size)
             , hitBy = Nothing  -- Not hit by anyone initially
             }
     in
@@ -215,7 +220,7 @@ view model =
 viewLanding : Html Msg
 viewLanding =
     div [ class "landing" ]
-        [ h1 [] [ text "Tomato Slingshot Battle" ]
+        [ h1 [] [ text "Tic Tac Tomato" ]
         , button [ onClick StartGame ] [ text "Start New Game" ]
         ]
 
@@ -301,9 +306,10 @@ viewTarget target =
         [ class "target"
         , style "left" (String.fromFloat target.x ++ "%")
         , style "bottom" (String.fromFloat target.y ++ "%")
-        , style "width" (String.fromFloat target.size ++ "%")
-        , style "height" (String.fromFloat target.size ++ "%")
-        , style "transform" "translate(-50%, -50%)"
+        , style "width" (String.fromFloat target.size ++ "px")
+        , style "height" (String.fromFloat target.size ++ "px")
+        , style "transform" "translateX(-50%)"
+        , style "margin-bottom" (String.fromFloat (-target.size / 2) ++ "px")
         , style "background-color" backgroundColor
         , style "border-color" borderColor
         ]

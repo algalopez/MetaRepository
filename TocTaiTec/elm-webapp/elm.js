@@ -5188,15 +5188,15 @@ var $author$project$Main$initTargets = function () {
 		]);
 	var positions = _List_fromArray(
 		[
-			_Utils_Tuple2(30, 40),
-			_Utils_Tuple2(45, 40),
-			_Utils_Tuple2(60, 40),
-			_Utils_Tuple2(30, 55),
-			_Utils_Tuple2(45, 55),
-			_Utils_Tuple2(60, 55),
-			_Utils_Tuple2(30, 70),
-			_Utils_Tuple2(45, 70),
-			_Utils_Tuple2(60, 70)
+			_Utils_Tuple2(35, 65),
+			_Utils_Tuple2(50, 65),
+			_Utils_Tuple2(65, 65),
+			_Utils_Tuple2(35, 50),
+			_Utils_Tuple2(50, 50),
+			_Utils_Tuple2(65, 50),
+			_Utils_Tuple2(35, 35),
+			_Utils_Tuple2(50, 35),
+			_Utils_Tuple2(65, 35)
 		]);
 	var createTarget = F2(
 		function (id, _v0) {
@@ -5206,7 +5206,7 @@ var $author$project$Main$initTargets = function () {
 			var _v2 = _v0.b;
 			var vx = _v2.a;
 			var vy = _v2.b;
-			return {hitBy: $elm$core$Maybe$Nothing, id: id, size: 12, velocityX: vx, velocityY: vy, x: x, y: y};
+			return {hitBy: $elm$core$Maybe$Nothing, id: id, size: 100, velocityX: vx, velocityY: vy, x: x, y: y};
 		});
 	return A2(
 		$elm$core$List$indexedMap,
@@ -5828,8 +5828,7 @@ var $author$project$Main$releaseSlingshot = function (slingshot) {
 var $author$project$Game$Types$PlayerB = {$: 'PlayerB'};
 var $author$project$Game$Physics$shootTomato = function (model) {
 	var strength = model.slingshot.strength;
-	var targetHeight = strength;
-	var velocityY = 40 + (strength * 0.6);
+	var velocityY = 30 + (strength * 0.6);
 	var velocityX = function () {
 		var _v1 = model.slingshot.direction;
 		if (_v1.$ === 'FacingRight') {
@@ -5846,7 +5845,7 @@ var $author$project$Game$Physics$shootTomato = function (model) {
 			return $author$project$Game$Types$PlayerA;
 		}
 	}();
-	var newProjectile = {active: true, lifetime: 0, shotBy: model.currentPlayer, targetHeight: targetHeight, velocityX: velocityX, velocityY: velocityY, x: model.slingshot.x, y: 0};
+	var newProjectile = {active: true, lifetime: 0, shotBy: model.currentPlayer, velocityX: velocityX, velocityY: velocityY, x: model.slingshot.x, y: 0};
 	return _Utils_Tuple2(
 		_Utils_update(
 			model,
@@ -5986,54 +5985,70 @@ var $author$project$Game$Physics$updateProjectiles = F2(
 				return proj;
 			} else {
 				var newLifetime = proj.lifetime + deltaTime;
-				var shouldDisappear = newLifetime > 2.5;
+				var shouldDisappear = newLifetime > 2.0;
 				var isFlying = newLifetime < 1.5;
-				var newVelocityY = (isFlying && (_Utils_cmp(proj.y, proj.targetHeight) < 0)) ? (proj.velocityY + (gravity * deltaTime)) : 0;
+				var newVelocityY = isFlying ? (proj.velocityY + (gravity * deltaTime)) : 0;
 				var newX = isFlying ? (proj.x + (proj.velocityX * deltaTime)) : proj.x;
-				var newY = (isFlying && (_Utils_cmp(proj.y, proj.targetHeight) < 0)) ? A2($elm$core$Basics$min, proj.targetHeight, proj.y + (newVelocityY * deltaTime)) : proj.y;
+				var newY = isFlying ? (proj.y + (newVelocityY * deltaTime)) : proj.y;
 				return shouldDisappear ? _Utils_update(
 					proj,
 					{active: false}) : ((!isFlying) ? _Utils_update(
 					proj,
-					{lifetime: newLifetime, velocityX: 0, velocityY: 0, x: newX, y: newY}) : ((_Utils_cmp(newY, proj.targetHeight) > -1) ? _Utils_update(
+					{lifetime: newLifetime, velocityX: 0, velocityY: 0}) : _Utils_update(
 					proj,
-					{lifetime: newLifetime, velocityX: proj.velocityX, velocityY: 0, x: newX, y: proj.targetHeight}) : _Utils_update(
-					proj,
-					{lifetime: newLifetime, velocityX: proj.velocityX, velocityY: newVelocityY, x: newX, y: newY})));
+					{lifetime: newLifetime, velocityX: proj.velocityX, velocityY: newVelocityY, x: newX, y: newY}));
 			}
 		};
 		var updatedProjectiles = A2($elm$core$List$map, updateProjectile, model.projectiles);
 		var updateTargetPosition = function (target) {
 			var newY = target.y + (target.velocityY * deltaTime);
 			var newX = target.x + (target.velocityX * deltaTime);
-			var _v5 = (newY <= 0) ? _Utils_Tuple2(
-				0,
-				$elm$core$Basics$abs(target.velocityY)) : ((newY >= 100) ? _Utils_Tuple2(
-				100,
+			var avgGameWidth = 1000;
+			var halfSizePercentX = ((target.size / 2) / avgGameWidth) * 100;
+			var avgGameHeight = 800;
+			var halfSizePercentY = ((target.size / 2) / avgGameHeight) * 100;
+			var _v4 = ((newY - halfSizePercentY) <= 0) ? _Utils_Tuple2(
+				halfSizePercentY,
+				$elm$core$Basics$abs(target.velocityY)) : (((newY + halfSizePercentY) >= 100) ? _Utils_Tuple2(
+				100 - halfSizePercentY,
 				-$elm$core$Basics$abs(target.velocityY)) : _Utils_Tuple2(newY, target.velocityY));
-			var finalY = _v5.a;
-			var finalVelY = _v5.b;
-			var _v6 = (newX <= 0) ? _Utils_Tuple2(
-				0,
-				$elm$core$Basics$abs(target.velocityX)) : ((newX >= 100) ? _Utils_Tuple2(
-				100,
+			var finalY = _v4.a;
+			var finalVelY = _v4.b;
+			var _v5 = ((newX - halfSizePercentX) <= 0) ? _Utils_Tuple2(
+				halfSizePercentX,
+				$elm$core$Basics$abs(target.velocityX)) : (((newX + halfSizePercentX) >= 100) ? _Utils_Tuple2(
+				100 - halfSizePercentX,
 				-$elm$core$Basics$abs(target.velocityX)) : _Utils_Tuple2(newX, target.velocityX));
-			var finalX = _v6.a;
-			var finalVelX = _v6.b;
+			var finalX = _v5.a;
+			var finalVelX = _v5.b;
 			return _Utils_update(
 				target,
 				{velocityX: finalVelX, velocityY: finalVelY, x: finalX, y: finalY});
 		};
+		var updatedTargetPositions = A2($elm$core$List$map, updateTargetPosition, model.targets);
 		var checkHit = F2(
 			function (proj, target) {
 				var wasFlying = (proj.lifetime - deltaTime) < 1.5;
 				var notAlreadyHit = _Utils_eq(target.hitBy, $elm$core$Maybe$Nothing);
 				var isStopped = proj.lifetime >= 1.5;
 				var justStopped = wasFlying && isStopped;
-				var halfSize = target.size / 2;
 				var distanceY = $elm$core$Basics$abs(proj.y - target.y);
 				var distanceX = $elm$core$Basics$abs(proj.x - target.x);
-				var isOverlapping = (_Utils_cmp(distanceX, halfSize) < 1) && (_Utils_cmp(distanceY, halfSize) < 1);
+				var avgGameWidth = 1000;
+				var halfSizePercent = ((target.size / 2) / avgGameWidth) * 100;
+				var isOverlapping = (_Utils_cmp(distanceX, halfSizePercent) < 1) && (_Utils_cmp(distanceY, halfSizePercent) < 1);
+				var _v3 = (justStopped && (!target.id)) ? A2(
+					$elm$core$Debug$log,
+					'Collision Check Square 1',
+					{
+						hit: isOverlapping && notAlreadyHit,
+						square: {x: target.x, y: target.y},
+						tomato: {x: proj.x, y: proj.y}
+					}) : {
+					hit: false,
+					square: {x: 0, y: 0},
+					tomato: {x: 0, y: 0}
+				};
 				return justStopped && (isOverlapping && notAlreadyHit);
 			});
 		var updateTargetWithHits = function (target) {
@@ -6056,10 +6071,25 @@ var $author$project$Game$Physics$updateProjectiles = F2(
 				target,
 				{hitBy: newHitBy});
 		};
-		var updatedTargets = A2(
-			$elm$core$List$map,
-			updateTargetPosition,
-			A2($elm$core$List$map, updateTargetWithHits, model.targets));
+		var updatedTargets = A2($elm$core$List$map, updateTargetWithHits, updatedTargetPositions);
+		var deactivateHitProjectiles = function (proj) {
+			var hitAnyTarget = A2(
+				$elm$core$List$any,
+				function (target) {
+					var _v1 = target.hitBy;
+					if (_v1.$ === 'Just') {
+						var player = _v1.a;
+						return _Utils_eq(player, proj.shotBy) && A2(checkHit, proj, target);
+					} else {
+						return false;
+					}
+				},
+				updatedTargets);
+			return hitAnyTarget ? _Utils_update(
+				proj,
+				{active: false}) : proj;
+		};
+		var finalProjectiles = A2($elm$core$List$map, deactivateHitProjectiles, updatedProjectiles);
 		var winner = $author$project$Game$Physics$checkWinner(updatedTargets);
 		var newGameState = function () {
 			if (winner.$ === 'Just') {
@@ -6069,53 +6099,6 @@ var $author$project$Game$Physics$updateProjectiles = F2(
 				return model.gameState;
 			}
 		}();
-		var _v0 = A2(
-			$elm$core$List$map,
-			function (proj) {
-				var square1 = $elm$core$List$head(
-					A2(
-						$elm$core$List$filter,
-						function (t) {
-							return !t.id;
-						},
-						model.targets));
-				var _v1 = function () {
-					if (square1.$ === 'Just') {
-						var sq = square1.a;
-						return A2(
-							$elm$core$Debug$log,
-							'TOMATO vs SQUARE 1',
-							{
-								square1: {
-									bounds: {bottom: sq.y - (sq.size / 2), left: sq.x - (sq.size / 2), right: sq.x + (sq.size / 2), top: sq.y + (sq.size / 2)},
-									size: sq.size,
-									x: sq.x,
-									y: sq.y
-								},
-								tomato: {x: proj.x, y: proj.y}
-							});
-					} else {
-						return {
-							square1: {
-								bounds: {bottom: 0, left: 0, right: 0, top: 0},
-								size: 0,
-								x: 0,
-								y: 0
-							},
-							tomato: {x: 0, y: 0}
-						};
-					}
-				}();
-				return proj;
-			},
-			A2(
-				$elm$core$List$filter,
-				function (proj) {
-					var wasFlying = (proj.lifetime - deltaTime) < 1.5;
-					var isStopped = proj.lifetime >= 1.5;
-					return wasFlying && isStopped;
-				},
-				updatedProjectiles));
 		return _Utils_Tuple2(
 			_Utils_update(
 				model,
@@ -6127,7 +6110,7 @@ var $author$project$Game$Physics$updateProjectiles = F2(
 						function ($) {
 							return $.active;
 						},
-						updatedProjectiles),
+						finalProjectiles),
 					targets: updatedTargets
 				}),
 			$elm$core$Platform$Cmd$none);
@@ -6310,12 +6293,16 @@ var $author$project$Main$viewTarget = function (target) {
 				A2(
 				$elm$html$Html$Attributes$style,
 				'width',
-				$elm$core$String$fromFloat(target.size) + '%'),
+				$elm$core$String$fromFloat(target.size) + 'px'),
 				A2(
 				$elm$html$Html$Attributes$style,
 				'height',
-				$elm$core$String$fromFloat(target.size) + '%'),
-				A2($elm$html$Html$Attributes$style, 'transform', 'translate(-50%, -50%)'),
+				$elm$core$String$fromFloat(target.size) + 'px'),
+				A2($elm$html$Html$Attributes$style, 'transform', 'translateX(-50%)'),
+				A2(
+				$elm$html$Html$Attributes$style,
+				'margin-bottom',
+				$elm$core$String$fromFloat((-target.size) / 2) + 'px'),
 				A2($elm$html$Html$Attributes$style, 'background-color', backgroundColor),
 				A2($elm$html$Html$Attributes$style, 'border-color', borderColor)
 			]),
@@ -6570,7 +6557,7 @@ var $author$project$Main$viewLanding = A2(
 			_List_Nil,
 			_List_fromArray(
 				[
-					$elm$html$Html$text('Tomato Slingshot Battle')
+					$elm$html$Html$text('Tic Tac Tomato')
 				])),
 			A2(
 			$elm$html$Html$button,

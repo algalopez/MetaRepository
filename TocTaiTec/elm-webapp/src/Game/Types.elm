@@ -33,7 +33,6 @@ type alias Projectile =
     , velocityX : Float
     , velocityY : Float
     , active : Bool
-    , targetHeight : Float  -- Target height percentage (0-100)
     , lifetime : Float  -- Time in seconds the projectile has existed
     , shotBy : Player  -- which player shot this projectile
     }
@@ -45,7 +44,7 @@ type alias Target =
     , y : Float  -- position from 0 to 100 (percentage)
     , velocityX : Float  -- pixels per second
     , velocityY : Float  -- pixels per second
-    , size : Float  -- size in percentage
+    , size : Float  -- size in pixels (fixed value)
     , hitBy : Maybe Player  -- which player hit this target (Nothing if not hit)
     }
 

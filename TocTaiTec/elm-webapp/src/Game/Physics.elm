@@ -52,12 +52,9 @@ checkWinner targets =
 shootTomato : Model -> ( Model, Cmd Msg )
 shootTomato model =
     let
-        -- _ = Debug.log "Shot" { strength = model.slingshot.strength, x = model.slingshot.x }
         strength = model.slingshot.strength
-        -- Use strength directly as target height percentage
-        targetHeight = strength  -- strength is 0-100, perfect for percentage
-        -- Fixed upward velocity with 5% angle
-        velocityY = 40 + (strength * 0.6)  -- Fast upward movement
+        -- Fixed upward velocity based on strength
+        velocityY = 30 + (strength * 0.6)  -- Fast upward movement
         -- Angle direction depends on slingshot facing direction
         velocityX = 
             case model.slingshot.direction of
@@ -69,7 +66,6 @@ shootTomato model =
             , velocityX = velocityX  -- Movement based on slingshot direction
             , velocityY = velocityY
             , active = True
-            , targetHeight = targetHeight  -- Store target height in projectile
             , lifetime = 0  -- Start lifetime at 0
             , shotBy = model.currentPlayer  -- Track who shot this
             }
@@ -108,25 +104,25 @@ updateProjectiles newTime model =
                 let
                     newLifetime = proj.lifetime + deltaTime
                     -- Phase 1: Flying (0 to 1.5 seconds)
-                    -- Phase 2: Stopped at hitting coordinates (1.5 to 2.5 seconds)
-                    -- Phase 3: Disappear (after 2.5 seconds)
+                    -- Phase 2: Stopped at hitting coordinates (1.5 to 2.0 seconds) - reduced to 0.5s
+                    -- Phase 3: Disappear (after 2.0 seconds)
                     
-                    shouldDisappear = newLifetime > 2.5
+                    shouldDisappear = newLifetime > 2.0
                     isFlying = newLifetime < 1.5
                     
                     -- Apply gravity and movement only while flying
                     newVelocityY = 
-                        if isFlying && proj.y < proj.targetHeight then
+                        if isFlying then
                             proj.velocityY + (gravity * deltaTime)
                         else
                             0
                             
                     newY = 
-                        if isFlying && proj.y < proj.targetHeight then
-                            -- Keep moving up until we reach target height, with gravity
-                            min proj.targetHeight (proj.y + (newVelocityY * deltaTime))
+                        if isFlying then
+                            -- Keep moving up with gravity
+                            proj.y + (newVelocityY * deltaTime)
                         else
-                            -- Stay at current position (either reached target or stopped)
+                            -- Stay at current position (stopped)
                             proj.y
                     
                     newX =
@@ -134,31 +130,21 @@ updateProjectiles newTime model =
                             -- Move horizontally while flying
                             proj.x + (proj.velocityX * deltaTime)
                         else
-                            -- Stay at current position
+                            -- Stay at current position (stopped)
                             proj.x
                 in
                 if shouldDisappear then
                     { proj | active = False }
                 else if not isFlying then
-                    -- Stopped at hitting coordinates (between 1.5 and 2.5 seconds)
+                    -- Stopped at hitting coordinates (between 1.5 and 2.0 seconds)
+                    -- Keep the position where it stopped (don't update x or y)
                     { proj
-                        | x = newX
-                        , y = newY
-                        , velocityX = 0
-                        , velocityY = 0
-                        , lifetime = newLifetime
-                    }
-                else if newY >= proj.targetHeight then
-                    -- We've reached our target height during flight, stop moving vertically
-                    { proj
-                        | x = newX
-                        , y = proj.targetHeight
-                        , velocityX = proj.velocityX
+                        | velocityX = 0
                         , velocityY = 0
                         , lifetime = newLifetime
                     }
                 else
-                    -- Still moving up, with gravity affecting velocity
+                    -- Still flying with gravity affecting velocity
                     { proj
                         | x = newX
                         , y = newY
@@ -177,72 +163,83 @@ updateProjectiles newTime model =
                 isStopped = proj.lifetime >= 1.5
                 justStopped = wasFlying && isStopped
                 
-                -- Check if projectile position overlaps with target square
-                -- The target is a square with size%, centered at (target.x, target.y)
-                -- The projectile is a point at (proj.x, proj.y)
-                halfSize = target.size / 2
+                -- Assume game area is about 1000px wide (average between min and max)
+                -- This converts pixel size to percentage for collision detection
+                avgGameWidth = 1000
+                halfSizePercent = (target.size / 2) / avgGameWidth * 100
                 
-                -- Calculate absolute distances
+                -- Calculate absolute distances (in percentage units)
                 distanceX = abs (proj.x - target.x)
                 distanceY = abs (proj.y - target.y)
                 
                 -- The projectile hits if it's within the target's bounds
-                isOverlapping = distanceX <= halfSize && distanceY <= halfSize
+                isOverlapping = distanceX <= halfSizePercent && distanceY <= halfSizePercent
                 
                 -- Target must not be already hit
                 notAlreadyHit = target.hitBy == Nothing
+                
+                -- Log collision check for square 1 (id = 0)
+                _ = if justStopped && target.id == 0 then
+                        Debug.log "Collision Check Square 1"
+                            { square = { x = target.x, y = target.y }
+                            , tomato = { x = proj.x, y = proj.y }
+                            , hit = isOverlapping && notAlreadyHit
+                            }
+                    else
+                        { square = { x = 0, y = 0 }
+                        , tomato = { x = 0, y = 0 }
+                        , hit = False
+                        }
             in
             justStopped && isOverlapping && notAlreadyHit
         
         -- Update targets and check for hits
         updatedProjectiles = List.map updateProjectile model.projectiles
         
-        -- Log when any projectile stops
-        _ = 
-            updatedProjectiles
-                |> List.filter (\proj -> 
-                    let
-                        wasFlying = (proj.lifetime - deltaTime) < 1.5
-                        isStopped = proj.lifetime >= 1.5
-                    in
-                    wasFlying && isStopped
-                )
-                |> List.map (\proj -> 
-                    let
-                        -- Find square 1 (id = 0)
-                        square1 = 
-                            model.targets
-                                |> List.filter (\t -> t.id == 0)
-                                |> List.head
-                        
-                        _ = case square1 of
-                            Just sq ->
-                                Debug.log "TOMATO vs SQUARE 1" 
-                                    { tomato = 
-                                        { x = proj.x
-                                        , y = proj.y
-                                        }
-                                    , square1 = 
-                                        { x = sq.x
-                                        , y = sq.y
-                                        , size = sq.size
-                                        , bounds = 
-                                            { left = sq.x - (sq.size / 2)
-                                            , right = sq.x + (sq.size / 2)
-                                            , bottom = sq.y - (sq.size / 2)
-                                            , top = sq.y + (sq.size / 2)
-                                            }
-                                        }
-                                    }
-                            Nothing ->
-                                { tomato = { x = 0, y = 0 }
-                                , square1 = { x = 0, y = 0, size = 0, bounds = { left = 0, right = 0, bottom = 0, top = 0 } }
-                                }
-                    in
-                    proj
-                )
+        -- Update target positions with bouncing
+        updateTargetPosition : Target -> Target
+        updateTargetPosition target =
+            let
+                -- Calculate new position
+                newX = target.x + (target.velocityX * deltaTime)
+                newY = target.y + (target.velocityY * deltaTime)
+                
+                -- Assume game area is about 1000px wide and 800px tall (average size)
+                -- Convert pixel size to percentage for bounds checking
+                avgGameWidth = 1000
+                avgGameHeight = 800
+                halfSizePercentX = (target.size / 2) / avgGameWidth * 100
+                halfSizePercentY = (target.size / 2) / avgGameHeight * 100
+                
+                -- Bounce off edges (0-100 range)
+                -- The square should bounce when its edge reaches the screen boundary
+                (finalX, finalVelX) = 
+                    if newX - halfSizePercentX <= 0 then
+                        (halfSizePercentX, abs target.velocityX)  -- Bounce right
+                    else if newX + halfSizePercentX >= 100 then
+                        (100 - halfSizePercentX, -(abs target.velocityX))  -- Bounce left
+                    else
+                        (newX, target.velocityX)
+                
+                (finalY, finalVelY) = 
+                    if newY - halfSizePercentY <= 0 then
+                        (halfSizePercentY, abs target.velocityY)  -- Bounce up when BOTTOM edge reaches 0
+                    else if newY + halfSizePercentY >= 100 then
+                        (100 - halfSizePercentY, -(abs target.velocityY))  -- Bounce down when TOP edge reaches 100
+                    else
+                        (newY, target.velocityY)
+            in
+            { target 
+                | x = finalX
+                , y = finalY
+                , velocityX = finalVelX
+                , velocityY = finalVelY
+            }
         
-        -- For each target, check if any projectile hit it
+        -- First, update target positions with bouncing
+        updatedTargetPositions = List.map updateTargetPosition model.targets
+        
+        -- Then, check for hits using the UPDATED target positions
         updateTargetWithHits : Target -> Target
         updateTargetWithHits target =
             let
@@ -260,43 +257,33 @@ updateProjectiles newTime model =
             in
             { target | hitBy = newHitBy }
         
-        -- Update target positions with bouncing
-        updateTargetPosition : Target -> Target
-        updateTargetPosition target =
-            let
-                -- Calculate new position
-                newX = target.x + (target.velocityX * deltaTime)
-                newY = target.y + (target.velocityY * deltaTime)
-                
-                -- Bounce off edges (0-100 range)
-                (finalX, finalVelX) = 
-                    if newX <= 0 then
-                        (0, abs target.velocityX)  -- Bounce right
-                    else if newX >= 100 then
-                        (100, -(abs target.velocityX))  -- Bounce left
-                    else
-                        (newX, target.velocityX)
-                
-                (finalY, finalVelY) = 
-                    if newY <= 0 then
-                        (0, abs target.velocityY)  -- Bounce up
-                    else if newY >= 100 then
-                        (100, -(abs target.velocityY))  -- Bounce down
-                    else
-                        (newY, target.velocityY)
-            in
-            { target 
-                | x = finalX
-                , y = finalY
-                , velocityX = finalVelX
-                , velocityY = finalVelY
-            }
-        
-        -- Update targets with position and hit detection
+        -- Update targets with hit detection using updated positions
         updatedTargets = 
-            model.targets
+            updatedTargetPositions
                 |> List.map updateTargetWithHits
-                |> List.map updateTargetPosition
+        
+        -- Deactivate projectiles that hit a target
+        deactivateHitProjectiles : Projectile -> Projectile
+        deactivateHitProjectiles proj =
+            let
+                -- Check if this projectile hit any target
+                hitAnyTarget = 
+                    updatedTargets
+                        |> List.any (\target -> 
+                            case target.hitBy of
+                                Just player -> 
+                                    player == proj.shotBy && checkHit proj target
+                                Nothing -> 
+                                    False
+                        )
+            in
+            if hitAnyTarget then
+                { proj | active = False }
+            else
+                proj
+        
+        -- Apply deactivation to projectiles that hit targets
+        finalProjectiles = List.map deactivateHitProjectiles updatedProjectiles
         
         -- Check if there's a winner after updating targets
         winner = checkWinner updatedTargets
@@ -307,7 +294,7 @@ updateProjectiles newTime model =
                 Nothing -> model.gameState
     in 
     ( { model
-        | projectiles = updatedProjectiles
+        | projectiles = finalProjectiles
             |> List.filter .active
         , targets = updatedTargets
         , lastTime = time
