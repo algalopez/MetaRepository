@@ -1,0 +1,26 @@
+{
+    "name": "smart weather",
+    "build": {
+        "dockerfile": "dockerfile_dev",
+        "context": ".."
+    },
+    "workspaceFolder": "/app",
+    "mounts": ["source=${localWorkspaceFolder}/,target=/app/,type=bind,consistency=cached"],
+    "postStartCommand": "ollama serve > /tmp/ollama.log 2>&1 &",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "humao.rest-client",
+                "ms-python.python",
+                "ms-python.autopep8"
+            ],
+            "settings": {
+                "workbench.tree.indent": 20,
+                "terminal.integrated.shell.linux": "/bin/bash"
+            }
+        }
+    },
+    "features": {
+        "ghcr.io/devcontainers/features/git:1": {}
+    }
+}

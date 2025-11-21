@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personality Selector</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: bold;
+        }
+
+        select, input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        select:focus, input[type="text"]:focus {
+            outline: none;
+            border-color: #4CAF50;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        #result {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-left: 4px solid #4CAF50;
+            border-radius: 4px;
+            display: none;
+        }
+
+        #result.show {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        #result p {
+            color: #333;
+            line-height: 1.6;
+            white-space: pre-line;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .status-ready {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .status-loading {
+            background-color: #FF9800;
+            color: white;
+        }
+
+        .status-fallback {
+            background-color: #2196F3;
+            color: white;
+        }
+
+        #modelStatus {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Weather app</h1>
+        
+        <div id="modelStatus">
+            <span class="status-badge status-loading">🔄 LLM Loading...</span>
+        </div>
+        
+        <form id="personalityForm">
+            <div class="form-group">
+                <label for="personality">Select a personality</label>
+                <select id="personality" name="personality" required>
+                    <option value="">-- Choose a personality --</option>
+                    <option value="grumpy">Grumpy old guy</option>
+                    <option value="scout">Happy flower girl scout</option>
+                    <option value="nerd">IT nerd wizard</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="city">Enter a City:</label>
+                <input type="text" id="city" name="city" placeholder="e.g., Trondheim" required>
+            </div>
+
+            <button type="submit">Submit</button>
+        </form>
+
+        <div id="result">
+            <p id="resultText"></p>
+        </div>
+    </div>
+
+    <script>
+        async function checkModelStatus() {
+            try {
+                const response = await fetch('/status');
+                const data = await response.json();
+                const statusDiv = document.getElementById('modelStatus');
+                const badge = statusDiv.querySelector('.status-badge');
+                
+                if (data.model_initialized) {
+                    badge.className = 'status-badge status-ready';
+                    badge.textContent = '✓ LLM Ready with MCP Tools';
+                } else {
+                    badge.className = 'status-badge status-fallback';
+                    badge.textContent = '⚡ Using Fallback Mode';
+                }
+            } catch (error) {
+                console.error('Error checking status:', error);
+            }
+        }
+        
+        checkModelStatus();
+        const statusInterval = setInterval(async () => {
+            const response = await fetch('/status');
+            const data = await response.json();
+            if (data.model_initialized) {
+                checkModelStatus();
+                clearInterval(statusInterval);
+            }
+        }, 5000);
+        
+        document.getElementById('personalityForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const personality = document.getElementById('personality').value;
+            const city = document.getElementById('city').value;
+            const resultDiv = document.getElementById('result');
+            const resultText = document.getElementById('resultText');
+            const submitButton = document.querySelector('button[type="submit"]');
+
+            if (!personality || !city.trim()) {
+                alert('Please fill in all fields');
+                return;
+            }
+
+            submitButton.disabled = true;
+            submitButton.textContent = 'Thinking...';
+
+            try {
+                const response = await fetch('/submit', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        personality: personality,
+                        city: city
+                    })
+                });
+
+                const data = await response.json();
+                
+                resultText.textContent = data.message;
+                resultDiv.classList.add('show');
+                
+                if (data.model_status === 'ready') {
+                    const statusDiv = document.getElementById('modelStatus');
+                    const badge = statusDiv.querySelector('.status-badge');
+                    badge.className = 'status-badge status-ready';
+                    badge.textContent = '✓ LLM Ready with MCP Tools';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                resultText.textContent = 'An error occurred. Please try again.';
+                resultDiv.classList.add('show');
+            } finally {
+                submitButton.disabled = false;
+                submitButton.textContent = 'Submit';
+            }
+        });
+    </script>
+</body>
+</html>
